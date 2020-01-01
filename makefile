@@ -1,5 +1,5 @@
 OWNER=graphql
-IMAGE_NAME=configurator
+IMAGE_NAME=exports
 QNAME=$(OWNER)/$(IMAGE_NAME)
 
 GIT_TAG=$(QNAME):$(TRAVIS_COMMIT)
