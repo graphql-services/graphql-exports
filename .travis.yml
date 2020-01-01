@@ -1,0 +1,22 @@
+language: go
+go:
+  - 1.13.1
+services:
+  - docker
+jobs:
+  include:
+    - stage: deploy
+      script: make build tag push
+    - stage: lambda
+      if: tag IS present
+      script: make build-lambda-function
+deploy:
+  provider: releases
+  api_key:
+    secure: b3ggI32XXb5pZUEI2tSTxPvlhwaI5iS3taxLiXX77xPKaA6B5Dc03mvl1RsMF8ppvyIi3VDDBRE/Qz9D92F39P3mvdpgPOe9mVc2ULWXyO7UOCY8KEDym3iigwA4T4xP0rv8xMpSpDFmFAlIafi+9WWxkbMmWRh5D2y4bReipoH4cH6xf/SdVARpXX3RYOS1tllhL3CeNoQcsTmxAxurJMKDXBwTuK8y6pK9THVpS1z/wIDq1T6c7SnDIZmz9UclCaN1DfEDYU6wgunpDW4sSKfYeqM4Y3Ls+6jGXSMhInoaBpdR9UpRjrdlapF7/IknaVwGs+3uPGsDaZvkmX4EUgEKMfX0+qm8vDpvUmf/UTmR4lce1rz/BaMBtDxXJXbG2RM5DJ6JGh/qQw5Nlqc0zDm+sV4DXCSEZEjosuW9hia+8GKGjCOrriMAVYlYn2N37TCCQYqjq5j797Emyh8xJQVYCOCzjD+LqyAPAu9W/EZEqMs3ikNhcwRGFt0q34TO+fHqpnrtOauZ79cN8CvhuhzsAq9jHtCPNN6VZZlic8dD50NLxMhF5RnIo9x8RbGqRl5L8N98Kneyx9sGpzF71jJnTr4+3Z2PPMVfTo2Tgu8Xtsu4zE7k55wyX/goDTliQknb2rReoruDezuNGrXtASX8AMWO6v0RIO3A1td7hdg=
+  file: lambda.zip
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: $TRAVIS_REPO_SLUG
+    condition: $TRAVIS_BUILD_STAGE_NAME = Lambda

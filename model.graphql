@@ -1,0 +1,11 @@
+type Export @entity {
+  type: String @column
+  metadata: String @column(type: text)
+
+  fileId: String @column
+  file: File
+}
+
+extend type File @key(fields: "id") {
+  id: ID! @external
+}
