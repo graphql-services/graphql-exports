@@ -27,7 +27,7 @@ deploy:
     bucket: "novacloud-lambda-functions"
     skip_cleanup: true
     region: eu-central-1
-    upload-dir: github.com/graphql-services/graphql-exports/$TRAVIS_BRANCH
+    upload-dir: github.com/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
     local_dir: release
     on:
       tags: true

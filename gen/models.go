@@ -22,14 +22,15 @@ type ExportResultType struct {
 }
 
 type Export struct {
-	ID        string     `json:"id" gorm:"column:id;primary_key"`
-	Type      *string    `json:"type" gorm:"column:type"`
-	Metadata  *string    `json:"metadata" gorm:"column:metadata;type:text"`
-	FileID    *string    `json:"fileId" gorm:"column:fileId"`
-	UpdatedAt *time.Time `json:"updatedAt" gorm:"column:updatedAt"`
-	CreatedAt time.Time  `json:"createdAt" gorm:"column:createdAt"`
-	UpdatedBy *string    `json:"updatedBy" gorm:"column:updatedBy"`
-	CreatedBy *string    `json:"createdBy" gorm:"column:createdBy"`
+	ID        string       `json:"id" gorm:"column:id;primary_key"`
+	Type      *string      `json:"type" gorm:"column:type"`
+	Metadata  *string      `json:"metadata" gorm:"column:metadata;type:text"`
+	State     *ExportState `json:"state" gorm:"column:state"`
+	FileID    *string      `json:"fileId" gorm:"column:fileId"`
+	UpdatedAt *time.Time   `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt time.Time    `json:"createdAt" gorm:"column:createdAt"`
+	UpdatedBy *string      `json:"updatedBy" gorm:"column:updatedBy"`
+	CreatedBy *string      `json:"createdBy" gorm:"column:createdBy"`
 }
 
 func (m *Export) Is_Entity() {}
@@ -38,6 +39,7 @@ type ExportChanges struct {
 	ID        string
 	Type      *string
 	Metadata  *string
+	State     *ExportState
 	FileID    *string
 	UpdatedAt *time.Time
 	CreatedAt time.Time

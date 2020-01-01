@@ -102,6 +102,12 @@ func CreateExportHandler(ctx context.Context, r *GeneratedResolver, input map[st
 		event.AddNewValue("metadata", changes.Metadata)
 	}
 
+	if _, ok := input["state"]; ok && (item.State != changes.State) && (item.State == nil || changes.State == nil || *item.State != *changes.State) {
+		item.State = changes.State
+
+		event.AddNewValue("state", changes.State)
+	}
+
 	if _, ok := input["fileId"]; ok && (item.FileID != changes.FileID) && (item.FileID == nil || changes.FileID == nil || *item.FileID != *changes.FileID) {
 		item.FileID = changes.FileID
 
@@ -168,6 +174,12 @@ func UpdateExportHandler(ctx context.Context, r *GeneratedResolver, id string, i
 		event.AddOldValue("metadata", item.Metadata)
 		event.AddNewValue("metadata", changes.Metadata)
 		item.Metadata = changes.Metadata
+	}
+
+	if _, ok := input["state"]; ok && (item.State != changes.State) && (item.State == nil || changes.State == nil || *item.State != *changes.State) {
+		event.AddOldValue("state", item.State)
+		event.AddNewValue("state", changes.State)
+		item.State = changes.State
 	}
 
 	if _, ok := input["fileId"]; ok && (item.FileID != changes.FileID) && (item.FileID == nil || changes.FileID == nil || *item.FileID != *changes.FileID) {

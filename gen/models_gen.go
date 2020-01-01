@@ -42,6 +42,14 @@ type ExportFilterType struct {
 	MetadataPrefix *string             `json:"metadata_prefix"`
 	MetadataSuffix *string             `json:"metadata_suffix"`
 	MetadataNull   *bool               `json:"metadata_null"`
+	State          *ExportState        `json:"state"`
+	StateNe        *ExportState        `json:"state_ne"`
+	StateGt        *ExportState        `json:"state_gt"`
+	StateLt        *ExportState        `json:"state_lt"`
+	StateGte       *ExportState        `json:"state_gte"`
+	StateLte       *ExportState        `json:"state_lte"`
+	StateIn        []ExportState       `json:"state_in"`
+	StateNull      *bool               `json:"state_null"`
 	FileID         *string             `json:"fileId"`
 	FileIDNe       *string             `json:"fileId_ne"`
 	FileIDGt       *string             `json:"fileId_gt"`
@@ -91,6 +99,7 @@ type ExportSortType struct {
 	ID        *ObjectSortType `json:"id"`
 	Type      *ObjectSortType `json:"type"`
 	Metadata  *ObjectSortType `json:"metadata"`
+	State     *ObjectSortType `json:"state"`
 	FileID    *ObjectSortType `json:"fileId"`
 	UpdatedAt *ObjectSortType `json:"updatedAt"`
 	CreatedAt *ObjectSortType `json:"createdAt"`
@@ -104,6 +113,47 @@ type File struct {
 
 type _Service struct {
 	Sdl *string `json:"sdl"`
+}
+
+type ExportState string
+
+const (
+	ExportStateCompleted ExportState = "COMPLETED"
+	ExportStateFailed    ExportState = "FAILED"
+)
+
+var AllExportState = []ExportState{
+	ExportStateCompleted,
+	ExportStateFailed,
+}
+
+func (e ExportState) IsValid() bool {
+	switch e {
+	case ExportStateCompleted, ExportStateFailed:
+		return true
+	}
+	return false
+}
+
+func (e ExportState) String() string {
+	return string(e)
+}
+
+func (e *ExportState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ExportState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ExportState", str)
+	}
+	return nil
+}
+
+func (e ExportState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type ObjectSortType string

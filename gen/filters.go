@@ -232,6 +232,49 @@ func (f *ExportFilterType) WhereContent(dialect gorm.Dialect, aliasPrefix string
 		}
 	}
 
+	if f.State != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" = ?")
+		values = append(values, f.State)
+	}
+
+	if f.StateNe != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" != ?")
+		values = append(values, f.StateNe)
+	}
+
+	if f.StateGt != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" > ?")
+		values = append(values, f.StateGt)
+	}
+
+	if f.StateLt != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" < ?")
+		values = append(values, f.StateLt)
+	}
+
+	if f.StateGte != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" >= ?")
+		values = append(values, f.StateGte)
+	}
+
+	if f.StateLte != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" <= ?")
+		values = append(values, f.StateLte)
+	}
+
+	if f.StateIn != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" IN (?)")
+		values = append(values, f.StateIn)
+	}
+
+	if f.StateNull != nil {
+		if *f.StateNull {
+			conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" IS NULL")
+		} else {
+			conditions = append(conditions, aliasPrefix+dialect.Quote("state")+" IS NOT NULL")
+		}
+	}
+
 	if f.FileID != nil {
 		conditions = append(conditions, aliasPrefix+dialect.Quote("fileId")+" = ?")
 		values = append(values, f.FileID)

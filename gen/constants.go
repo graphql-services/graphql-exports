@@ -28,10 +28,16 @@ enum ObjectSortType {
   DESC
 }
 
+enum ExportState {
+  COMPLETED
+  FAILED
+}
+
 type Export {
   id: ID!
   type: String
   metadata: String
+  state: ExportState
   fileId: String
   file: File
   updatedAt: Time
@@ -48,12 +54,14 @@ input ExportCreateInput {
   id: ID
   type: String
   metadata: String
+  state: ExportState
   fileId: String
 }
 
 input ExportUpdateInput {
   type: String
   metadata: String
+  state: ExportState
   fileId: String
 }
 
@@ -61,6 +69,7 @@ input ExportSortType {
   id: ObjectSortType
   type: ObjectSortType
   metadata: ObjectSortType
+  state: ObjectSortType
   fileId: ObjectSortType
   updatedAt: ObjectSortType
   createdAt: ObjectSortType
@@ -101,6 +110,14 @@ input ExportFilterType {
   metadata_prefix: String
   metadata_suffix: String
   metadata_null: Boolean
+  state: ExportState
+  state_ne: ExportState
+  state_gt: ExportState
+  state_lt: ExportState
+  state_gte: ExportState
+  state_lte: ExportState
+  state_in: [ExportState!]
+  state_null: Boolean
   fileId: String
   fileId_ne: String
   fileId_gt: String

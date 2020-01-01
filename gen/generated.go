@@ -52,6 +52,7 @@ type ComplexityRoot struct {
 		FileID    func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Metadata  func(childComplexity int) int
+		State     func(childComplexity int) int
 		Type      func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 		UpdatedBy func(childComplexity int) int
@@ -159,6 +160,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Export.Metadata(childComplexity), true
+
+	case "Export.state":
+		if e.complexity.Export.State == nil {
+			break
+		}
+
+		return e.complexity.Export.State(childComplexity), true
 
 	case "Export.type":
 		if e.complexity.Export.Type == nil {
@@ -374,10 +382,16 @@ enum ObjectSortType {
   DESC
 }
 
+enum ExportState {
+  COMPLETED
+  FAILED
+}
+
 type Export {
   id: ID!
   type: String
   metadata: String
+  state: ExportState
   fileId: String
   file: File
   updatedAt: Time
@@ -390,12 +404,14 @@ input ExportCreateInput {
   id: ID
   type: String
   metadata: String
+  state: ExportState
   fileId: String
 }
 
 input ExportUpdateInput {
   type: String
   metadata: String
+  state: ExportState
   fileId: String
 }
 
@@ -403,6 +419,7 @@ input ExportSortType {
   id: ObjectSortType
   type: ObjectSortType
   metadata: ObjectSortType
+  state: ObjectSortType
   fileId: ObjectSortType
   updatedAt: ObjectSortType
   createdAt: ObjectSortType
@@ -443,6 +460,14 @@ input ExportFilterType {
   metadata_prefix: String
   metadata_suffix: String
   metadata_null: Boolean
+  state: ExportState
+  state_ne: ExportState
+  state_gt: ExportState
+  state_lt: ExportState
+  state_gte: ExportState
+  state_lte: ExportState
+  state_in: [ExportState!]
+  state_null: Boolean
   fileId: String
   fileId_ne: String
   fileId_gt: String
@@ -786,6 +811,40 @@ func (ec *executionContext) _Export_metadata(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Export_state(ctx context.Context, field graphql.CollectedField, obj *Export) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Export",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.State, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ExportState)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Export_fileId(ctx context.Context, field graphql.CollectedField, obj *Export) (ret graphql.Marshaler) {
@@ -2852,6 +2911,54 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "state":
+			var err error
+			it.State, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_ne":
+			var err error
+			it.StateNe, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_gt":
+			var err error
+			it.StateGt, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_lt":
+			var err error
+			it.StateLt, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_gte":
+			var err error
+			it.StateGte, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_lte":
+			var err error
+			it.StateLte, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_in":
+			var err error
+			it.StateIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_null":
+			var err error
+			it.StateNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId":
 			var err error
 			it.FileID, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -3140,6 +3247,12 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "state":
+			var err error
+			it.State, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId":
 			var err error
 			it.FileID, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
@@ -3204,6 +3317,8 @@ func (ec *executionContext) _Export(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec._Export_type(ctx, field, obj)
 		case "metadata":
 			out.Values[i] = ec._Export_metadata(ctx, field, obj)
+		case "state":
+			out.Values[i] = ec._Export_state(ctx, field, obj)
 		case "fileId":
 			out.Values[i] = ec._Export_fileId(ctx, field, obj)
 		case "file":
@@ -3793,6 +3908,15 @@ func (ec *executionContext) unmarshalNExportSortType2ᚖgithubᚗcomᚋgraphql�
 	return &res, err
 }
 
+func (ec *executionContext) unmarshalNExportState2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, v interface{}) (ExportState, error) {
+	var res ExportState
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNExportState2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, sel ast.SelectionSet, v ExportState) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNExportUpdateInput2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
 	if v == nil {
 		return nil, nil
@@ -4209,6 +4333,90 @@ func (ec *executionContext) unmarshalOExportSortType2ᚕᚖgithubᚗcomᚋgraphq
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) unmarshalOExportState2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, v interface{}) (ExportState, error) {
+	var res ExportState
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalOExportState2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, sel ast.SelectionSet, v ExportState) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, v interface{}) ([]ExportState, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]ExportState, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNExportState2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, sel ast.SelectionSet, v []ExportState) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNExportState2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, v interface{}) (*ExportState, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOExportState2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, sel ast.SelectionSet, v *ExportState) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalOFile2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐFile(ctx context.Context, sel ast.SelectionSet, v File) graphql.Marshaler {

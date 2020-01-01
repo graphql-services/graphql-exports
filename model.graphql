@@ -1,6 +1,11 @@
+enum ExportState {
+  COMPLETED
+  FAILED
+}
 type Export @entity {
   type: String @column
   metadata: String @column(type: text)
+  state: ExportState @column
 
   fileId: String @column
   file: File
