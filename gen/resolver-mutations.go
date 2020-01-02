@@ -108,6 +108,12 @@ func CreateExportHandler(ctx context.Context, r *GeneratedResolver, input map[st
 		event.AddNewValue("state", changes.State)
 	}
 
+	if _, ok := input["errorDescription"]; ok && (item.ErrorDescription != changes.ErrorDescription) && (item.ErrorDescription == nil || changes.ErrorDescription == nil || *item.ErrorDescription != *changes.ErrorDescription) {
+		item.ErrorDescription = changes.ErrorDescription
+
+		event.AddNewValue("errorDescription", changes.ErrorDescription)
+	}
+
 	if _, ok := input["fileId"]; ok && (item.FileID != changes.FileID) && (item.FileID == nil || changes.FileID == nil || *item.FileID != *changes.FileID) {
 		item.FileID = changes.FileID
 
@@ -180,6 +186,12 @@ func UpdateExportHandler(ctx context.Context, r *GeneratedResolver, id string, i
 		event.AddOldValue("state", item.State)
 		event.AddNewValue("state", changes.State)
 		item.State = changes.State
+	}
+
+	if _, ok := input["errorDescription"]; ok && (item.ErrorDescription != changes.ErrorDescription) && (item.ErrorDescription == nil || changes.ErrorDescription == nil || *item.ErrorDescription != *changes.ErrorDescription) {
+		event.AddOldValue("errorDescription", item.ErrorDescription)
+		event.AddNewValue("errorDescription", changes.ErrorDescription)
+		item.ErrorDescription = changes.ErrorDescription
 	}
 
 	if _, ok := input["fileId"]; ok && (item.FileID != changes.FileID) && (item.FileID == nil || changes.FileID == nil || *item.FileID != *changes.FileID) {

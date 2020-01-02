@@ -29,8 +29,9 @@ enum ObjectSortType {
 }
 
 enum ExportState {
+  PROCESSING
   COMPLETED
-  FAILED
+  ERROR
 }
 
 type Export {
@@ -38,6 +39,7 @@ type Export {
   type: String
   metadata: String
   state: ExportState
+  errorDescription: String
   fileId: String
   file: File
   updatedAt: Time
@@ -55,6 +57,7 @@ input ExportCreateInput {
   type: String
   metadata: String
   state: ExportState
+  errorDescription: String
   fileId: String
 }
 
@@ -62,6 +65,7 @@ input ExportUpdateInput {
   type: String
   metadata: String
   state: ExportState
+  errorDescription: String
   fileId: String
 }
 
@@ -70,6 +74,7 @@ input ExportSortType {
   type: ObjectSortType
   metadata: ObjectSortType
   state: ObjectSortType
+  errorDescription: ObjectSortType
   fileId: ObjectSortType
   updatedAt: ObjectSortType
   createdAt: ObjectSortType
@@ -118,6 +123,17 @@ input ExportFilterType {
   state_lte: ExportState
   state_in: [ExportState!]
   state_null: Boolean
+  errorDescription: String
+  errorDescription_ne: String
+  errorDescription_gt: String
+  errorDescription_lt: String
+  errorDescription_gte: String
+  errorDescription_lte: String
+  errorDescription_in: [String!]
+  errorDescription_like: String
+  errorDescription_prefix: String
+  errorDescription_suffix: String
+  errorDescription_null: Boolean
   fileId: String
   fileId_ne: String
   fileId_gt: String

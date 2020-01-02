@@ -24,6 +24,10 @@ func (s ExportSortType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialect
 		*sorts = append(*sorts, aliasPrefix+dialect.Quote("metadata")+" "+s.Metadata.String())
 	}
 
+	if s.ErrorDescription != nil {
+		*sorts = append(*sorts, aliasPrefix+dialect.Quote("errorDescription")+" "+s.ErrorDescription.String())
+	}
+
 	if s.FileID != nil {
 		*sorts = append(*sorts, aliasPrefix+dialect.Quote("fileId")+" "+s.FileID.String())
 	}

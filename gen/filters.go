@@ -275,6 +275,64 @@ func (f *ExportFilterType) WhereContent(dialect gorm.Dialect, aliasPrefix string
 		}
 	}
 
+	if f.ErrorDescription != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" = ?")
+		values = append(values, f.ErrorDescription)
+	}
+
+	if f.ErrorDescriptionNe != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" != ?")
+		values = append(values, f.ErrorDescriptionNe)
+	}
+
+	if f.ErrorDescriptionGt != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" > ?")
+		values = append(values, f.ErrorDescriptionGt)
+	}
+
+	if f.ErrorDescriptionLt != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" < ?")
+		values = append(values, f.ErrorDescriptionLt)
+	}
+
+	if f.ErrorDescriptionGte != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" >= ?")
+		values = append(values, f.ErrorDescriptionGte)
+	}
+
+	if f.ErrorDescriptionLte != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" <= ?")
+		values = append(values, f.ErrorDescriptionLte)
+	}
+
+	if f.ErrorDescriptionIn != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" IN (?)")
+		values = append(values, f.ErrorDescriptionIn)
+	}
+
+	if f.ErrorDescriptionLike != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" LIKE ?")
+		values = append(values, strings.Replace(strings.Replace(*f.ErrorDescriptionLike, "?", "_", -1), "*", "%", -1))
+	}
+
+	if f.ErrorDescriptionPrefix != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" LIKE ?")
+		values = append(values, fmt.Sprintf("%s%%", *f.ErrorDescriptionPrefix))
+	}
+
+	if f.ErrorDescriptionSuffix != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" LIKE ?")
+		values = append(values, fmt.Sprintf("%%%s", *f.ErrorDescriptionSuffix))
+	}
+
+	if f.ErrorDescriptionNull != nil {
+		if *f.ErrorDescriptionNull {
+			conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" IS NULL")
+		} else {
+			conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" IS NOT NULL")
+		}
+	}
+
 	if f.FileID != nil {
 		conditions = append(conditions, aliasPrefix+dialect.Quote("fileId")+" = ?")
 		values = append(values, f.FileID)

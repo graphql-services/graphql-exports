@@ -1,11 +1,13 @@
 enum ExportState {
+  PROCESSING
   COMPLETED
-  FAILED
+  ERROR
 }
 type Export @entity {
   type: String @column
   metadata: String @column(type: text)
   state: ExportState @column
+  errorDescription: String @column
 
   fileId: String @column
   file: File

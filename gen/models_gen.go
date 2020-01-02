@@ -10,101 +10,113 @@ import (
 )
 
 type ExportFilterType struct {
-	And            []*ExportFilterType `json:"AND"`
-	Or             []*ExportFilterType `json:"OR"`
-	ID             *string             `json:"id"`
-	IDNe           *string             `json:"id_ne"`
-	IDGt           *string             `json:"id_gt"`
-	IDLt           *string             `json:"id_lt"`
-	IDGte          *string             `json:"id_gte"`
-	IDLte          *string             `json:"id_lte"`
-	IDIn           []string            `json:"id_in"`
-	IDNull         *bool               `json:"id_null"`
-	Type           *string             `json:"type"`
-	TypeNe         *string             `json:"type_ne"`
-	TypeGt         *string             `json:"type_gt"`
-	TypeLt         *string             `json:"type_lt"`
-	TypeGte        *string             `json:"type_gte"`
-	TypeLte        *string             `json:"type_lte"`
-	TypeIn         []string            `json:"type_in"`
-	TypeLike       *string             `json:"type_like"`
-	TypePrefix     *string             `json:"type_prefix"`
-	TypeSuffix     *string             `json:"type_suffix"`
-	TypeNull       *bool               `json:"type_null"`
-	Metadata       *string             `json:"metadata"`
-	MetadataNe     *string             `json:"metadata_ne"`
-	MetadataGt     *string             `json:"metadata_gt"`
-	MetadataLt     *string             `json:"metadata_lt"`
-	MetadataGte    *string             `json:"metadata_gte"`
-	MetadataLte    *string             `json:"metadata_lte"`
-	MetadataIn     []string            `json:"metadata_in"`
-	MetadataLike   *string             `json:"metadata_like"`
-	MetadataPrefix *string             `json:"metadata_prefix"`
-	MetadataSuffix *string             `json:"metadata_suffix"`
-	MetadataNull   *bool               `json:"metadata_null"`
-	State          *ExportState        `json:"state"`
-	StateNe        *ExportState        `json:"state_ne"`
-	StateGt        *ExportState        `json:"state_gt"`
-	StateLt        *ExportState        `json:"state_lt"`
-	StateGte       *ExportState        `json:"state_gte"`
-	StateLte       *ExportState        `json:"state_lte"`
-	StateIn        []ExportState       `json:"state_in"`
-	StateNull      *bool               `json:"state_null"`
-	FileID         *string             `json:"fileId"`
-	FileIDNe       *string             `json:"fileId_ne"`
-	FileIDGt       *string             `json:"fileId_gt"`
-	FileIDLt       *string             `json:"fileId_lt"`
-	FileIDGte      *string             `json:"fileId_gte"`
-	FileIDLte      *string             `json:"fileId_lte"`
-	FileIDIn       []string            `json:"fileId_in"`
-	FileIDLike     *string             `json:"fileId_like"`
-	FileIDPrefix   *string             `json:"fileId_prefix"`
-	FileIDSuffix   *string             `json:"fileId_suffix"`
-	FileIDNull     *bool               `json:"fileId_null"`
-	UpdatedAt      *time.Time          `json:"updatedAt"`
-	UpdatedAtNe    *time.Time          `json:"updatedAt_ne"`
-	UpdatedAtGt    *time.Time          `json:"updatedAt_gt"`
-	UpdatedAtLt    *time.Time          `json:"updatedAt_lt"`
-	UpdatedAtGte   *time.Time          `json:"updatedAt_gte"`
-	UpdatedAtLte   *time.Time          `json:"updatedAt_lte"`
-	UpdatedAtIn    []*time.Time        `json:"updatedAt_in"`
-	UpdatedAtNull  *bool               `json:"updatedAt_null"`
-	CreatedAt      *time.Time          `json:"createdAt"`
-	CreatedAtNe    *time.Time          `json:"createdAt_ne"`
-	CreatedAtGt    *time.Time          `json:"createdAt_gt"`
-	CreatedAtLt    *time.Time          `json:"createdAt_lt"`
-	CreatedAtGte   *time.Time          `json:"createdAt_gte"`
-	CreatedAtLte   *time.Time          `json:"createdAt_lte"`
-	CreatedAtIn    []*time.Time        `json:"createdAt_in"`
-	CreatedAtNull  *bool               `json:"createdAt_null"`
-	UpdatedBy      *string             `json:"updatedBy"`
-	UpdatedByNe    *string             `json:"updatedBy_ne"`
-	UpdatedByGt    *string             `json:"updatedBy_gt"`
-	UpdatedByLt    *string             `json:"updatedBy_lt"`
-	UpdatedByGte   *string             `json:"updatedBy_gte"`
-	UpdatedByLte   *string             `json:"updatedBy_lte"`
-	UpdatedByIn    []string            `json:"updatedBy_in"`
-	UpdatedByNull  *bool               `json:"updatedBy_null"`
-	CreatedBy      *string             `json:"createdBy"`
-	CreatedByNe    *string             `json:"createdBy_ne"`
-	CreatedByGt    *string             `json:"createdBy_gt"`
-	CreatedByLt    *string             `json:"createdBy_lt"`
-	CreatedByGte   *string             `json:"createdBy_gte"`
-	CreatedByLte   *string             `json:"createdBy_lte"`
-	CreatedByIn    []string            `json:"createdBy_in"`
-	CreatedByNull  *bool               `json:"createdBy_null"`
+	And                    []*ExportFilterType `json:"AND"`
+	Or                     []*ExportFilterType `json:"OR"`
+	ID                     *string             `json:"id"`
+	IDNe                   *string             `json:"id_ne"`
+	IDGt                   *string             `json:"id_gt"`
+	IDLt                   *string             `json:"id_lt"`
+	IDGte                  *string             `json:"id_gte"`
+	IDLte                  *string             `json:"id_lte"`
+	IDIn                   []string            `json:"id_in"`
+	IDNull                 *bool               `json:"id_null"`
+	Type                   *string             `json:"type"`
+	TypeNe                 *string             `json:"type_ne"`
+	TypeGt                 *string             `json:"type_gt"`
+	TypeLt                 *string             `json:"type_lt"`
+	TypeGte                *string             `json:"type_gte"`
+	TypeLte                *string             `json:"type_lte"`
+	TypeIn                 []string            `json:"type_in"`
+	TypeLike               *string             `json:"type_like"`
+	TypePrefix             *string             `json:"type_prefix"`
+	TypeSuffix             *string             `json:"type_suffix"`
+	TypeNull               *bool               `json:"type_null"`
+	Metadata               *string             `json:"metadata"`
+	MetadataNe             *string             `json:"metadata_ne"`
+	MetadataGt             *string             `json:"metadata_gt"`
+	MetadataLt             *string             `json:"metadata_lt"`
+	MetadataGte            *string             `json:"metadata_gte"`
+	MetadataLte            *string             `json:"metadata_lte"`
+	MetadataIn             []string            `json:"metadata_in"`
+	MetadataLike           *string             `json:"metadata_like"`
+	MetadataPrefix         *string             `json:"metadata_prefix"`
+	MetadataSuffix         *string             `json:"metadata_suffix"`
+	MetadataNull           *bool               `json:"metadata_null"`
+	State                  *ExportState        `json:"state"`
+	StateNe                *ExportState        `json:"state_ne"`
+	StateGt                *ExportState        `json:"state_gt"`
+	StateLt                *ExportState        `json:"state_lt"`
+	StateGte               *ExportState        `json:"state_gte"`
+	StateLte               *ExportState        `json:"state_lte"`
+	StateIn                []ExportState       `json:"state_in"`
+	StateNull              *bool               `json:"state_null"`
+	ErrorDescription       *string             `json:"errorDescription"`
+	ErrorDescriptionNe     *string             `json:"errorDescription_ne"`
+	ErrorDescriptionGt     *string             `json:"errorDescription_gt"`
+	ErrorDescriptionLt     *string             `json:"errorDescription_lt"`
+	ErrorDescriptionGte    *string             `json:"errorDescription_gte"`
+	ErrorDescriptionLte    *string             `json:"errorDescription_lte"`
+	ErrorDescriptionIn     []string            `json:"errorDescription_in"`
+	ErrorDescriptionLike   *string             `json:"errorDescription_like"`
+	ErrorDescriptionPrefix *string             `json:"errorDescription_prefix"`
+	ErrorDescriptionSuffix *string             `json:"errorDescription_suffix"`
+	ErrorDescriptionNull   *bool               `json:"errorDescription_null"`
+	FileID                 *string             `json:"fileId"`
+	FileIDNe               *string             `json:"fileId_ne"`
+	FileIDGt               *string             `json:"fileId_gt"`
+	FileIDLt               *string             `json:"fileId_lt"`
+	FileIDGte              *string             `json:"fileId_gte"`
+	FileIDLte              *string             `json:"fileId_lte"`
+	FileIDIn               []string            `json:"fileId_in"`
+	FileIDLike             *string             `json:"fileId_like"`
+	FileIDPrefix           *string             `json:"fileId_prefix"`
+	FileIDSuffix           *string             `json:"fileId_suffix"`
+	FileIDNull             *bool               `json:"fileId_null"`
+	UpdatedAt              *time.Time          `json:"updatedAt"`
+	UpdatedAtNe            *time.Time          `json:"updatedAt_ne"`
+	UpdatedAtGt            *time.Time          `json:"updatedAt_gt"`
+	UpdatedAtLt            *time.Time          `json:"updatedAt_lt"`
+	UpdatedAtGte           *time.Time          `json:"updatedAt_gte"`
+	UpdatedAtLte           *time.Time          `json:"updatedAt_lte"`
+	UpdatedAtIn            []*time.Time        `json:"updatedAt_in"`
+	UpdatedAtNull          *bool               `json:"updatedAt_null"`
+	CreatedAt              *time.Time          `json:"createdAt"`
+	CreatedAtNe            *time.Time          `json:"createdAt_ne"`
+	CreatedAtGt            *time.Time          `json:"createdAt_gt"`
+	CreatedAtLt            *time.Time          `json:"createdAt_lt"`
+	CreatedAtGte           *time.Time          `json:"createdAt_gte"`
+	CreatedAtLte           *time.Time          `json:"createdAt_lte"`
+	CreatedAtIn            []*time.Time        `json:"createdAt_in"`
+	CreatedAtNull          *bool               `json:"createdAt_null"`
+	UpdatedBy              *string             `json:"updatedBy"`
+	UpdatedByNe            *string             `json:"updatedBy_ne"`
+	UpdatedByGt            *string             `json:"updatedBy_gt"`
+	UpdatedByLt            *string             `json:"updatedBy_lt"`
+	UpdatedByGte           *string             `json:"updatedBy_gte"`
+	UpdatedByLte           *string             `json:"updatedBy_lte"`
+	UpdatedByIn            []string            `json:"updatedBy_in"`
+	UpdatedByNull          *bool               `json:"updatedBy_null"`
+	CreatedBy              *string             `json:"createdBy"`
+	CreatedByNe            *string             `json:"createdBy_ne"`
+	CreatedByGt            *string             `json:"createdBy_gt"`
+	CreatedByLt            *string             `json:"createdBy_lt"`
+	CreatedByGte           *string             `json:"createdBy_gte"`
+	CreatedByLte           *string             `json:"createdBy_lte"`
+	CreatedByIn            []string            `json:"createdBy_in"`
+	CreatedByNull          *bool               `json:"createdBy_null"`
 }
 
 type ExportSortType struct {
-	ID        *ObjectSortType `json:"id"`
-	Type      *ObjectSortType `json:"type"`
-	Metadata  *ObjectSortType `json:"metadata"`
-	State     *ObjectSortType `json:"state"`
-	FileID    *ObjectSortType `json:"fileId"`
-	UpdatedAt *ObjectSortType `json:"updatedAt"`
-	CreatedAt *ObjectSortType `json:"createdAt"`
-	UpdatedBy *ObjectSortType `json:"updatedBy"`
-	CreatedBy *ObjectSortType `json:"createdBy"`
+	ID               *ObjectSortType `json:"id"`
+	Type             *ObjectSortType `json:"type"`
+	Metadata         *ObjectSortType `json:"metadata"`
+	State            *ObjectSortType `json:"state"`
+	ErrorDescription *ObjectSortType `json:"errorDescription"`
+	FileID           *ObjectSortType `json:"fileId"`
+	UpdatedAt        *ObjectSortType `json:"updatedAt"`
+	CreatedAt        *ObjectSortType `json:"createdAt"`
+	UpdatedBy        *ObjectSortType `json:"updatedBy"`
+	CreatedBy        *ObjectSortType `json:"createdBy"`
 }
 
 type File struct {
@@ -118,18 +130,20 @@ type _Service struct {
 type ExportState string
 
 const (
-	ExportStateCompleted ExportState = "COMPLETED"
-	ExportStateFailed    ExportState = "FAILED"
+	ExportStateProcessing ExportState = "PROCESSING"
+	ExportStateCompleted  ExportState = "COMPLETED"
+	ExportStateError      ExportState = "ERROR"
 )
 
 var AllExportState = []ExportState{
+	ExportStateProcessing,
 	ExportStateCompleted,
-	ExportStateFailed,
+	ExportStateError,
 }
 
 func (e ExportState) IsValid() bool {
 	switch e {
-	case ExportStateCompleted, ExportStateFailed:
+	case ExportStateProcessing, ExportStateCompleted, ExportStateError:
 		return true
 	}
 	return false

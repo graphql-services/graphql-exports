@@ -46,16 +46,17 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Export struct {
-		CreatedAt func(childComplexity int) int
-		CreatedBy func(childComplexity int) int
-		File      func(childComplexity int) int
-		FileID    func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Metadata  func(childComplexity int) int
-		State     func(childComplexity int) int
-		Type      func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
-		UpdatedBy func(childComplexity int) int
+		CreatedAt        func(childComplexity int) int
+		CreatedBy        func(childComplexity int) int
+		ErrorDescription func(childComplexity int) int
+		File             func(childComplexity int) int
+		FileID           func(childComplexity int) int
+		ID               func(childComplexity int) int
+		Metadata         func(childComplexity int) int
+		State            func(childComplexity int) int
+		Type             func(childComplexity int) int
+		UpdatedAt        func(childComplexity int) int
+		UpdatedBy        func(childComplexity int) int
 	}
 
 	ExportResultType struct {
@@ -132,6 +133,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Export.CreatedBy(childComplexity), true
+
+	case "Export.errorDescription":
+		if e.complexity.Export.ErrorDescription == nil {
+			break
+		}
+
+		return e.complexity.Export.ErrorDescription(childComplexity), true
 
 	case "Export.file":
 		if e.complexity.Export.File == nil {
@@ -383,8 +391,9 @@ enum ObjectSortType {
 }
 
 enum ExportState {
+  PROCESSING
   COMPLETED
-  FAILED
+  ERROR
 }
 
 type Export {
@@ -392,6 +401,7 @@ type Export {
   type: String
   metadata: String
   state: ExportState
+  errorDescription: String
   fileId: String
   file: File
   updatedAt: Time
@@ -405,6 +415,7 @@ input ExportCreateInput {
   type: String
   metadata: String
   state: ExportState
+  errorDescription: String
   fileId: String
 }
 
@@ -412,6 +423,7 @@ input ExportUpdateInput {
   type: String
   metadata: String
   state: ExportState
+  errorDescription: String
   fileId: String
 }
 
@@ -420,6 +432,7 @@ input ExportSortType {
   type: ObjectSortType
   metadata: ObjectSortType
   state: ObjectSortType
+  errorDescription: ObjectSortType
   fileId: ObjectSortType
   updatedAt: ObjectSortType
   createdAt: ObjectSortType
@@ -468,6 +481,17 @@ input ExportFilterType {
   state_lte: ExportState
   state_in: [ExportState!]
   state_null: Boolean
+  errorDescription: String
+  errorDescription_ne: String
+  errorDescription_gt: String
+  errorDescription_lt: String
+  errorDescription_gte: String
+  errorDescription_lte: String
+  errorDescription_in: [String!]
+  errorDescription_like: String
+  errorDescription_prefix: String
+  errorDescription_suffix: String
+  errorDescription_null: Boolean
   fileId: String
   fileId_ne: String
   fileId_gt: String
@@ -845,6 +869,40 @@ func (ec *executionContext) _Export_state(ctx context.Context, field graphql.Col
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Export_errorDescription(ctx context.Context, field graphql.CollectedField, obj *Export) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Export",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ErrorDescription, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Export_fileId(ctx context.Context, field graphql.CollectedField, obj *Export) (ret graphql.Marshaler) {
@@ -2959,6 +3017,72 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "errorDescription":
+			var err error
+			it.ErrorDescription, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_ne":
+			var err error
+			it.ErrorDescriptionNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_gt":
+			var err error
+			it.ErrorDescriptionGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_lt":
+			var err error
+			it.ErrorDescriptionLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_gte":
+			var err error
+			it.ErrorDescriptionGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_lte":
+			var err error
+			it.ErrorDescriptionLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_in":
+			var err error
+			it.ErrorDescriptionIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_like":
+			var err error
+			it.ErrorDescriptionLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_prefix":
+			var err error
+			it.ErrorDescriptionPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_suffix":
+			var err error
+			it.ErrorDescriptionSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_null":
+			var err error
+			it.ErrorDescriptionNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId":
 			var err error
 			it.FileID, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -3253,6 +3377,12 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "errorDescription":
+			var err error
+			it.ErrorDescription, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId":
 			var err error
 			it.FileID, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
@@ -3319,6 +3449,8 @@ func (ec *executionContext) _Export(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec._Export_metadata(ctx, field, obj)
 		case "state":
 			out.Values[i] = ec._Export_state(ctx, field, obj)
+		case "errorDescription":
+			out.Values[i] = ec._Export_errorDescription(ctx, field, obj)
 		case "fileId":
 			out.Values[i] = ec._Export_fileId(ctx, field, obj)
 		case "file":
