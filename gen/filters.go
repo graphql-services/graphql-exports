@@ -275,6 +275,49 @@ func (f *ExportFilterType) WhereContent(dialect gorm.Dialect, aliasPrefix string
 		}
 	}
 
+	if f.Progress != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" = ?")
+		values = append(values, f.Progress)
+	}
+
+	if f.ProgressNe != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" != ?")
+		values = append(values, f.ProgressNe)
+	}
+
+	if f.ProgressGt != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" > ?")
+		values = append(values, f.ProgressGt)
+	}
+
+	if f.ProgressLt != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" < ?")
+		values = append(values, f.ProgressLt)
+	}
+
+	if f.ProgressGte != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" >= ?")
+		values = append(values, f.ProgressGte)
+	}
+
+	if f.ProgressLte != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" <= ?")
+		values = append(values, f.ProgressLte)
+	}
+
+	if f.ProgressIn != nil {
+		conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" IN (?)")
+		values = append(values, f.ProgressIn)
+	}
+
+	if f.ProgressNull != nil {
+		if *f.ProgressNull {
+			conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" IS NULL")
+		} else {
+			conditions = append(conditions, aliasPrefix+dialect.Quote("progress")+" IS NOT NULL")
+		}
+	}
+
 	if f.ErrorDescription != nil {
 		conditions = append(conditions, aliasPrefix+dialect.Quote("errorDescription")+" = ?")
 		values = append(values, f.ErrorDescription)

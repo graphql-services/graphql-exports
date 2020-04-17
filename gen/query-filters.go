@@ -66,6 +66,18 @@ func (qf *ExportQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields [
 		*values = append(*values, query+"%", "% "+query+"%")
 	}
 
+	if _, ok := fieldsMap["progress"]; ok {
+
+		cast := "TEXT"
+		if dialect.GetName() == "mysql" {
+			cast = "CHAR"
+		}
+		column := fmt.Sprintf("CAST(%s"+dialect.Quote("progress")+" AS %s)", dialect.Quote(alias)+".", cast)
+
+		*ors = append(*ors, fmt.Sprintf("%[1]s LIKE ? OR %[1]s LIKE ?", column))
+		*values = append(*values, query+"%", "% "+query+"%")
+	}
+
 	if _, ok := fieldsMap["errorDescription"]; ok {
 
 		column := dialect.Quote(alias) + "." + dialect.Quote("errorDescription")

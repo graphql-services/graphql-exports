@@ -39,6 +39,7 @@ type Export {
   type: String
   metadata: String
   state: ExportState
+  progress: Float
   errorDescription: String
   fileId: String
   file: File
@@ -57,6 +58,7 @@ input ExportCreateInput {
   type: String
   metadata: String
   state: ExportState
+  progress: Float
   errorDescription: String
   fileId: String
 }
@@ -65,6 +67,7 @@ input ExportUpdateInput {
   type: String
   metadata: String
   state: ExportState
+  progress: Float
   errorDescription: String
   fileId: String
 }
@@ -74,6 +77,7 @@ input ExportSortType {
   type: ObjectSortType
   metadata: ObjectSortType
   state: ObjectSortType
+  progress: ObjectSortType
   errorDescription: ObjectSortType
   fileId: ObjectSortType
   updatedAt: ObjectSortType
@@ -123,6 +127,14 @@ input ExportFilterType {
   state_lte: ExportState
   state_in: [ExportState!]
   state_null: Boolean
+  progress: Float
+  progress_ne: Float
+  progress_gt: Float
+  progress_lt: Float
+  progress_gte: Float
+  progress_lte: Float
+  progress_in: [Float!]
+  progress_null: Boolean
   errorDescription: String
   errorDescription_ne: String
   errorDescription_gt: String

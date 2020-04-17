@@ -50,6 +50,14 @@ type ExportFilterType struct {
 	StateLte               *ExportState        `json:"state_lte"`
 	StateIn                []ExportState       `json:"state_in"`
 	StateNull              *bool               `json:"state_null"`
+	Progress               *float64            `json:"progress"`
+	ProgressNe             *float64            `json:"progress_ne"`
+	ProgressGt             *float64            `json:"progress_gt"`
+	ProgressLt             *float64            `json:"progress_lt"`
+	ProgressGte            *float64            `json:"progress_gte"`
+	ProgressLte            *float64            `json:"progress_lte"`
+	ProgressIn             []float64           `json:"progress_in"`
+	ProgressNull           *bool               `json:"progress_null"`
 	ErrorDescription       *string             `json:"errorDescription"`
 	ErrorDescriptionNe     *string             `json:"errorDescription_ne"`
 	ErrorDescriptionGt     *string             `json:"errorDescription_gt"`
@@ -111,6 +119,7 @@ type ExportSortType struct {
 	Type             *ObjectSortType `json:"type"`
 	Metadata         *ObjectSortType `json:"metadata"`
 	State            *ObjectSortType `json:"state"`
+	Progress         *ObjectSortType `json:"progress"`
 	ErrorDescription *ObjectSortType `json:"errorDescription"`
 	FileID           *ObjectSortType `json:"fileId"`
 	UpdatedAt        *ObjectSortType `json:"updatedAt"`

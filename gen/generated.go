@@ -53,6 +53,7 @@ type ComplexityRoot struct {
 		FileID           func(childComplexity int) int
 		ID               func(childComplexity int) int
 		Metadata         func(childComplexity int) int
+		Progress         func(childComplexity int) int
 		State            func(childComplexity int) int
 		Type             func(childComplexity int) int
 		UpdatedAt        func(childComplexity int) int
@@ -168,6 +169,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Export.Metadata(childComplexity), true
+
+	case "Export.progress":
+		if e.complexity.Export.Progress == nil {
+			break
+		}
+
+		return e.complexity.Export.Progress(childComplexity), true
 
 	case "Export.state":
 		if e.complexity.Export.State == nil {
@@ -401,6 +409,7 @@ type Export {
   type: String
   metadata: String
   state: ExportState
+  progress: Float
   errorDescription: String
   fileId: String
   file: File
@@ -415,6 +424,7 @@ input ExportCreateInput {
   type: String
   metadata: String
   state: ExportState
+  progress: Float
   errorDescription: String
   fileId: String
 }
@@ -423,6 +433,7 @@ input ExportUpdateInput {
   type: String
   metadata: String
   state: ExportState
+  progress: Float
   errorDescription: String
   fileId: String
 }
@@ -432,6 +443,7 @@ input ExportSortType {
   type: ObjectSortType
   metadata: ObjectSortType
   state: ObjectSortType
+  progress: ObjectSortType
   errorDescription: ObjectSortType
   fileId: ObjectSortType
   updatedAt: ObjectSortType
@@ -481,6 +493,14 @@ input ExportFilterType {
   state_lte: ExportState
   state_in: [ExportState!]
   state_null: Boolean
+  progress: Float
+  progress_ne: Float
+  progress_gt: Float
+  progress_lt: Float
+  progress_gte: Float
+  progress_lte: Float
+  progress_in: [Float!]
+  progress_null: Boolean
   errorDescription: String
   errorDescription_ne: String
   errorDescription_gt: String
@@ -869,6 +889,40 @@ func (ec *executionContext) _Export_state(ctx context.Context, field graphql.Col
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Export_progress(ctx context.Context, field graphql.CollectedField, obj *Export) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Export",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Progress, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Export_errorDescription(ctx context.Context, field graphql.CollectedField, obj *Export) (ret graphql.Marshaler) {
@@ -3017,6 +3071,54 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "progress":
+			var err error
+			it.Progress, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_ne":
+			var err error
+			it.ProgressNe, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_gt":
+			var err error
+			it.ProgressGt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_lt":
+			var err error
+			it.ProgressLt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_gte":
+			var err error
+			it.ProgressGte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_lte":
+			var err error
+			it.ProgressLte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_in":
+			var err error
+			it.ProgressIn, err = ec.unmarshalOFloat2ᚕfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_null":
+			var err error
+			it.ProgressNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription":
 			var err error
 			it.ErrorDescription, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -3377,6 +3479,12 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "progress":
+			var err error
+			it.Progress, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription":
 			var err error
 			it.ErrorDescription, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
@@ -3449,6 +3557,8 @@ func (ec *executionContext) _Export(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec._Export_metadata(ctx, field, obj)
 		case "state":
 			out.Values[i] = ec._Export_state(ctx, field, obj)
+		case "progress":
+			out.Values[i] = ec._Export_progress(ctx, field, obj)
 		case "errorDescription":
 			out.Values[i] = ec._Export_errorDescription(ctx, field, obj)
 		case "fileId":
@@ -4056,6 +4166,20 @@ func (ec *executionContext) unmarshalNExportUpdateInput2map(ctx context.Context,
 	return v.(map[string]interface{}), nil
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	return graphql.UnmarshalFloat(v)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
@@ -4560,6 +4684,61 @@ func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋ
 		return graphql.Null
 	}
 	return ec._File(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	return graphql.UnmarshalFloat(v)
+}
+
+func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	return graphql.MarshalFloat(v)
+}
+
+func (ec *executionContext) unmarshalOFloat2ᚕfloat64(ctx context.Context, v interface{}) ([]float64, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]float64, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNFloat2float64(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOFloat2ᚕfloat64(ctx context.Context, sel ast.SelectionSet, v []float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNFloat2float64(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOFloat2float64(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOFloat2float64(ctx, sel, *v)
 }
 
 func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {

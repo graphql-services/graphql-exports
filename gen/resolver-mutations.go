@@ -108,6 +108,12 @@ func CreateExportHandler(ctx context.Context, r *GeneratedResolver, input map[st
 		event.AddNewValue("state", changes.State)
 	}
 
+	if _, ok := input["progress"]; ok && (item.Progress != changes.Progress) && (item.Progress == nil || changes.Progress == nil || *item.Progress != *changes.Progress) {
+		item.Progress = changes.Progress
+
+		event.AddNewValue("progress", changes.Progress)
+	}
+
 	if _, ok := input["errorDescription"]; ok && (item.ErrorDescription != changes.ErrorDescription) && (item.ErrorDescription == nil || changes.ErrorDescription == nil || *item.ErrorDescription != *changes.ErrorDescription) {
 		item.ErrorDescription = changes.ErrorDescription
 
@@ -186,6 +192,12 @@ func UpdateExportHandler(ctx context.Context, r *GeneratedResolver, id string, i
 		event.AddOldValue("state", item.State)
 		event.AddNewValue("state", changes.State)
 		item.State = changes.State
+	}
+
+	if _, ok := input["progress"]; ok && (item.Progress != changes.Progress) && (item.Progress == nil || changes.Progress == nil || *item.Progress != *changes.Progress) {
+		event.AddOldValue("progress", item.Progress)
+		event.AddNewValue("progress", changes.Progress)
+		item.Progress = changes.Progress
 	}
 
 	if _, ok := input["errorDescription"]; ok && (item.ErrorDescription != changes.ErrorDescription) && (item.ErrorDescription == nil || changes.ErrorDescription == nil || *item.ErrorDescription != *changes.ErrorDescription) {

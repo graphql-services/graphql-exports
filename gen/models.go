@@ -26,6 +26,7 @@ type Export struct {
 	Type             *string      `json:"type" gorm:"column:type"`
 	Metadata         *string      `json:"metadata" gorm:"column:metadata;type:text"`
 	State            *ExportState `json:"state" gorm:"column:state"`
+	Progress         *float64     `json:"progress" gorm:"column:progress"`
 	ErrorDescription *string      `json:"errorDescription" gorm:"column:errorDescription"`
 	FileID           *string      `json:"fileId" gorm:"column:fileId"`
 	UpdatedAt        *time.Time   `json:"updatedAt" gorm:"column:updatedAt"`
@@ -41,6 +42,7 @@ type ExportChanges struct {
 	Type             *string
 	Metadata         *string
 	State            *ExportState
+	Progress         *float64
 	ErrorDescription *string
 	FileID           *string
 	UpdatedAt        *time.Time
