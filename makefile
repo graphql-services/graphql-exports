@@ -1,10 +1,10 @@
 OWNER=graphql
-IMAGE_NAME=exports
+IMAGE_NAME=files-s3
 QNAME=$(OWNER)/$(IMAGE_NAME)
 
-GIT_TAG=$(QNAME):$(TRAVIS_COMMIT)
-BUILD_TAG=$(QNAME):$(TRAVIS_BUILD_NUMBER).$(TRAVIS_COMMIT)
-TAG=$(QNAME):`echo $(TRAVIS_BRANCH) | sed 's/master/latest/;s/develop/unstable/' | sed 's/\//-/'`
+GIT_TAG=$(QNAME):$(GITHUB_SHA)
+BUILD_TAG=$(QNAME):$(GITHUB_RUN_ID).$(GITHUB_SHA)
+TAG=$(QNAME):`echo $(GITHUB_REF) | sed 's/refs\/heads\///' | sed 's/master/latest/;s/develop/unstable/'`
 
 lint:
 	docker run -it --rm -v "$(PWD)/Dockerfile:/Dockerfile:ro" redcoolbeans/dockerlint
@@ -15,17 +15,19 @@ build:
 	# CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/binary .
 	docker build -t $(GIT_TAG) .
 	
+blah:
+	echo $(GIT_TAG)
+
 tag:
 	docker tag $(GIT_TAG) $(BUILD_TAG)
 	docker tag $(GIT_TAG) $(TAG)
 	
 login:
-	@docker login -u "$(DOCKER_USER)" -p "$(DOCKER_PASS)"
+	@docker login -u "$(DOCKER_USER)" -p "$(DOCKER_PASSWORD)"
 push: login
 	# docker push $(GIT_TAG)
 	# docker push $(BUILD_TAG)
 	docker push $(TAG)
-
 generate:
 	GO111MODULE=on go run github.com/novacloudcz/graphql-orm
 
