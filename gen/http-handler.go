@@ -8,10 +8,12 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/handler"
-	jwtgo "github.com/dgrijalva/jwt-go"
+	jwtgo "github.com/golang-jwt/jwt"
+	"gopkg.in/gormigrate.v1"
 )
 
-func GetHTTPServeMux(r ResolverRoot, db *DB) *http.ServeMux {
+// GetHTTPServeMux ...
+func GetHTTPServeMux(r ResolverRoot, db *DB, migrations []*gormigrate.Migration) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	executableSchema := NewExecutableSchema(Config{Resolvers: r})
@@ -22,7 +24,14 @@ func GetHTTPServeMux(r ResolverRoot, db *DB) *http.ServeMux {
 	playgroundHandler := handler.Playground("GraphQL playground", "/graphql")
 	if os.Getenv("EXPOSE_MIGRATION_ENDPOINT") == "true" {
 		mux.HandleFunc("/migrate", func(res http.ResponseWriter, req *http.Request) {
-			err := db.AutoMigrate().Error
+			err := db.Migrate(migrations)
+			if err != nil {
+				http.Error(res, err.Error(), 400)
+			}
+			fmt.Fprintf(res, "OK")
+		})
+		mux.HandleFunc("/automigrate", func(res http.ResponseWriter, req *http.Request) {
+			err := db.AutoMigrate()
 			if err != nil {
 				http.Error(res, err.Error(), 400)
 			}
@@ -36,7 +45,10 @@ func GetHTTPServeMux(r ResolverRoot, db *DB) *http.ServeMux {
 			principalID = &(*claims).Subject
 		}
 		ctx := context.WithValue(req.Context(), KeyJWTClaims, claims)
-		ctx = context.WithValue(ctx, KeyPrincipalID, principalID)
+		ctx = context.WithValue(ctx, KeyHTTPRequest, req)
+		if principalID != nil {
+			ctx = context.WithValue(ctx, KeyPrincipalID, principalID)
+		}
 		ctx = context.WithValue(ctx, KeyLoaders, loaders)
 		ctx = context.WithValue(ctx, KeyExecutableSchema, executableSchema)
 		req = req.WithContext(ctx)
@@ -51,16 +63,25 @@ func GetHTTPServeMux(r ResolverRoot, db *DB) *http.ServeMux {
 	return handler
 }
 
+// GetPrincipalIDFromContext ...
 func GetPrincipalIDFromContext(ctx context.Context) *string {
 	v, _ := ctx.Value(KeyPrincipalID).(*string)
 	return v
 }
 
+// GetJWTClaimsFromContext ...
 func GetJWTClaimsFromContext(ctx context.Context) *JWTClaims {
 	val, _ := ctx.Value(KeyJWTClaims).(*JWTClaims)
 	return val
 }
 
+// GetHTTPRequestFromContext ...
+func GetHTTPRequestFromContext(ctx context.Context) *http.Request {
+	v, _ := ctx.Value(KeyHTTPRequest).(*http.Request)
+	return v
+}
+
+// JWTClaims ...
 type JWTClaims struct {
 	jwtgo.StandardClaims
 	Scope *string
@@ -79,6 +100,7 @@ func getJWTClaims(req *http.Request) (*JWTClaims, error) {
 	return p, nil
 }
 
+// Scopes ...
 func (c *JWTClaims) Scopes() []string {
 	s := c.Scope
 	if s != nil && len(*s) > 0 {
@@ -86,6 +108,8 @@ func (c *JWTClaims) Scopes() []string {
 	}
 	return []string{}
 }
+
+// HasScope ...
 func (c *JWTClaims) HasScope(scope string) bool {
 	for _, s := range c.Scopes() {
 		if s == scope {

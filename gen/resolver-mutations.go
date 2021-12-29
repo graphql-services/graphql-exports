@@ -2,24 +2,30 @@ package gen
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
 	"github.com/novacloudcz/graphql-orm/events"
 )
 
+// GeneratedMutationResolver ...
 type GeneratedMutationResolver struct{ *GeneratedResolver }
 
+// MutationEvents ...
 type MutationEvents struct {
 	Events []events.Event
 }
 
+// EnrichContextWithMutations ...
 func EnrichContextWithMutations(ctx context.Context, r *GeneratedResolver) context.Context {
-	_ctx := context.WithValue(ctx, KeyMutationTransaction, r.DB.db.Begin())
+	_ctx := context.WithValue(ctx, KeyMutationTransaction, r.GetDB(ctx).Begin())
 	_ctx = context.WithValue(_ctx, KeyMutationEvents, &MutationEvents{})
 	return _ctx
 }
+
+// FinishMutationContext ...
 func FinishMutationContext(ctx context.Context, r *GeneratedResolver) (err error) {
 	s := GetMutationEventStore(ctx)
 
@@ -30,7 +36,7 @@ func FinishMutationContext(ctx context.Context, r *GeneratedResolver) (err error
 		}
 	}
 
-	tx := GetTransaction(ctx)
+	tx := r.GetDB(ctx)
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
@@ -43,31 +49,42 @@ func FinishMutationContext(ctx context.Context, r *GeneratedResolver) (err error
 
 	return
 }
-func GetTransaction(ctx context.Context) *gorm.DB {
-	return ctx.Value(KeyMutationTransaction).(*gorm.DB)
+
+// RollbackMutationContext ...
+func RollbackMutationContext(ctx context.Context, r *GeneratedResolver) error {
+	tx := r.GetDB(ctx)
+	return tx.Rollback().Error
 }
+
+// GetMutationEventStore ...
 func GetMutationEventStore(ctx context.Context) *MutationEvents {
 	return ctx.Value(KeyMutationEvents).(*MutationEvents)
 }
+
+// AddMutationEvent ...
 func AddMutationEvent(ctx context.Context, e events.Event) {
 	s := GetMutationEventStore(ctx)
 	s.Events = append(s.Events, e)
 }
 
+// CreateExport ...
 func (r *GeneratedMutationResolver) CreateExport(ctx context.Context, input map[string]interface{}) (item *Export, err error) {
 	ctx = EnrichContextWithMutations(ctx, r.GeneratedResolver)
 	item, err = r.Handlers.CreateExport(ctx, r.GeneratedResolver, input)
 	if err != nil {
+		RollbackMutationContext(ctx, r.GeneratedResolver)
 		return
 	}
 	err = FinishMutationContext(ctx, r.GeneratedResolver)
 	return
 }
+
+// CreateExportHandler ...
 func CreateExportHandler(ctx context.Context, r *GeneratedResolver, input map[string]interface{}) (item *Export, err error) {
 	principalID := GetPrincipalIDFromContext(ctx)
 	now := time.Now()
 	item = &Export{ID: uuid.Must(uuid.NewV4()).String(), CreatedAt: now, CreatedBy: principalID}
-	tx := GetTransaction(ctx)
+	tx := r.GetDB(ctx)
 
 	event := events.NewEvent(events.EventMetadata{
 		Type:        events.EventTypeCreated,
@@ -132,26 +149,29 @@ func CreateExportHandler(ctx context.Context, r *GeneratedResolver, input map[st
 		return
 	}
 
-	if len(event.Changes) > 0 {
-		AddMutationEvent(ctx, event)
-	}
+	AddMutationEvent(ctx, event)
 
 	return
 }
+
+// UpdateExport ...
 func (r *GeneratedMutationResolver) UpdateExport(ctx context.Context, id string, input map[string]interface{}) (item *Export, err error) {
 	ctx = EnrichContextWithMutations(ctx, r.GeneratedResolver)
 	item, err = r.Handlers.UpdateExport(ctx, r.GeneratedResolver, id, input)
 	if err != nil {
+		RollbackMutationContext(ctx, r.GeneratedResolver)
 		return
 	}
 	err = FinishMutationContext(ctx, r.GeneratedResolver)
 	return
 }
+
+// UpdateExportHandler ...
 func UpdateExportHandler(ctx context.Context, r *GeneratedResolver, id string, input map[string]interface{}) (item *Export, err error) {
 	principalID := GetPrincipalIDFromContext(ctx)
 	item = &Export{}
 	now := time.Now()
-	tx := GetTransaction(ctx)
+	tx := r.GetDB(ctx)
 
 	event := events.NewEvent(events.EventMetadata{
 		Type:        events.EventTypeUpdated,
@@ -224,20 +244,25 @@ func UpdateExportHandler(ctx context.Context, r *GeneratedResolver, id string, i
 
 	return
 }
+
+// DeleteExport ...
 func (r *GeneratedMutationResolver) DeleteExport(ctx context.Context, id string) (item *Export, err error) {
 	ctx = EnrichContextWithMutations(ctx, r.GeneratedResolver)
 	item, err = r.Handlers.DeleteExport(ctx, r.GeneratedResolver, id)
 	if err != nil {
+		RollbackMutationContext(ctx, r.GeneratedResolver)
 		return
 	}
 	err = FinishMutationContext(ctx, r.GeneratedResolver)
 	return
 }
+
+// DeleteExportHandler ...
 func DeleteExportHandler(ctx context.Context, r *GeneratedResolver, id string) (item *Export, err error) {
 	principalID := GetPrincipalIDFromContext(ctx)
 	item = &Export{}
 	now := time.Now()
-	tx := GetTransaction(ctx)
+	tx := r.GetDB(ctx)
 
 	err = GetItem(ctx, tx, item, &id)
 	if err != nil {
@@ -259,20 +284,30 @@ func DeleteExportHandler(ctx context.Context, r *GeneratedResolver, id string) (
 		return
 	}
 
-	if len(event.Changes) > 0 {
-		AddMutationEvent(ctx, event)
-	}
+	AddMutationEvent(ctx, event)
 
 	return
 }
+
+// DeleteAllExports ...
 func (r *GeneratedMutationResolver) DeleteAllExports(ctx context.Context) (bool, error) {
 	ctx = EnrichContextWithMutations(ctx, r.GeneratedResolver)
 	done, err := r.Handlers.DeleteAllExports(ctx, r.GeneratedResolver)
+	if err != nil {
+		RollbackMutationContext(ctx, r.GeneratedResolver)
+		return done, err
+	}
 	err = FinishMutationContext(ctx, r.GeneratedResolver)
 	return done, err
 }
+
+// DeleteAllExportsHandler ...
 func DeleteAllExportsHandler(ctx context.Context, r *GeneratedResolver) (bool, error) {
-	tx := GetTransaction(ctx)
+	// delete all resolvers are primarily used for
+	if os.Getenv("ENABLE_DELETE_ALL_RESOLVERS") == "" {
+		return false, fmt.Errorf("delete all resolver is not enabled (ENABLE_DELETE_ALL_RESOLVERS not specified)")
+	}
+	tx := r.GetDB(ctx)
 	err := tx.Delete(&Export{}).Error
 	if err != nil {
 		tx.Rollback()

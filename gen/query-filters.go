@@ -9,10 +9,12 @@ import (
 	"github.com/vektah/gqlparser/ast"
 )
 
+// ExportQueryFilter ...
 type ExportQueryFilter struct {
 	Query *string
 }
 
+// Apply ...
 func (qf *ExportQueryFilter) Apply(ctx context.Context, dialect gorm.Dialect, selectionSet *ast.SelectionSet, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	if qf.Query == nil {
 		return nil

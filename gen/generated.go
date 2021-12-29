@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -60,9 +61,25 @@ type ComplexityRoot struct {
 		UpdatedBy        func(childComplexity int) int
 	}
 
+	ExportResultAggregations struct {
+		ErrorDescriptionMax func(childComplexity int) int
+		ErrorDescriptionMin func(childComplexity int) int
+		FileIDMax           func(childComplexity int) int
+		FileIDMin           func(childComplexity int) int
+		MetadataMax         func(childComplexity int) int
+		MetadataMin         func(childComplexity int) int
+		ProgressAvg         func(childComplexity int) int
+		ProgressMax         func(childComplexity int) int
+		ProgressMin         func(childComplexity int) int
+		ProgressSum         func(childComplexity int) int
+		TypeMax             func(childComplexity int) int
+		TypeMin             func(childComplexity int) int
+	}
+
 	ExportResultType struct {
-		Count func(childComplexity int) int
-		Items func(childComplexity int) int
+		Aggregations func(childComplexity int) int
+		Count        func(childComplexity int) int
+		Items        func(childComplexity int) int
 	}
 
 	File struct {
@@ -77,9 +94,10 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Export   func(childComplexity int, id *string, q *string, filter *ExportFilterType) int
-		Exports  func(childComplexity int, offset *int, limit *int, q *string, sort []*ExportSortType, filter *ExportFilterType) int
-		_service func(childComplexity int) int
+		Export    func(childComplexity int, id *string, q *string, filter *ExportFilterType) int
+		Exports   func(childComplexity int, offset *int, limit *int, q *string, sort []*ExportSortType, filter *ExportFilterType) int
+		_entities func(childComplexity int, representations []interface{}) int
+		_service  func(childComplexity int) int
 	}
 
 	_Service struct {
@@ -93,6 +111,7 @@ type ExportResolver interface {
 type ExportResultTypeResolver interface {
 	Items(ctx context.Context, obj *ExportResultType) ([]*Export, error)
 	Count(ctx context.Context, obj *ExportResultType) (int, error)
+	Aggregations(ctx context.Context, obj *ExportResultType) (*ExportResultAggregations, error)
 }
 type MutationResolver interface {
 	CreateExport(ctx context.Context, input map[string]interface{}) (*Export, error)
@@ -102,6 +121,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	_service(ctx context.Context) (*_Service, error)
+	_entities(ctx context.Context, representations []interface{}) ([]_Entity, error)
 	Export(ctx context.Context, id *string, q *string, filter *ExportFilterType) (*Export, error)
 	Exports(ctx context.Context, offset *int, limit *int, q *string, sort []*ExportSortType, filter *ExportFilterType) (*ExportResultType, error)
 }
@@ -205,6 +225,97 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Export.UpdatedBy(childComplexity), true
 
+	case "ExportResultAggregations.errorDescriptionMax":
+		if e.complexity.ExportResultAggregations.ErrorDescriptionMax == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.ErrorDescriptionMax(childComplexity), true
+
+	case "ExportResultAggregations.errorDescriptionMin":
+		if e.complexity.ExportResultAggregations.ErrorDescriptionMin == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.ErrorDescriptionMin(childComplexity), true
+
+	case "ExportResultAggregations.fileIdMax":
+		if e.complexity.ExportResultAggregations.FileIDMax == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.FileIDMax(childComplexity), true
+
+	case "ExportResultAggregations.fileIdMin":
+		if e.complexity.ExportResultAggregations.FileIDMin == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.FileIDMin(childComplexity), true
+
+	case "ExportResultAggregations.metadataMax":
+		if e.complexity.ExportResultAggregations.MetadataMax == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.MetadataMax(childComplexity), true
+
+	case "ExportResultAggregations.metadataMin":
+		if e.complexity.ExportResultAggregations.MetadataMin == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.MetadataMin(childComplexity), true
+
+	case "ExportResultAggregations.progressAvg":
+		if e.complexity.ExportResultAggregations.ProgressAvg == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.ProgressAvg(childComplexity), true
+
+	case "ExportResultAggregations.progressMax":
+		if e.complexity.ExportResultAggregations.ProgressMax == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.ProgressMax(childComplexity), true
+
+	case "ExportResultAggregations.progressMin":
+		if e.complexity.ExportResultAggregations.ProgressMin == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.ProgressMin(childComplexity), true
+
+	case "ExportResultAggregations.progressSum":
+		if e.complexity.ExportResultAggregations.ProgressSum == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.ProgressSum(childComplexity), true
+
+	case "ExportResultAggregations.typeMax":
+		if e.complexity.ExportResultAggregations.TypeMax == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.TypeMax(childComplexity), true
+
+	case "ExportResultAggregations.typeMin":
+		if e.complexity.ExportResultAggregations.TypeMin == nil {
+			break
+		}
+
+		return e.complexity.ExportResultAggregations.TypeMin(childComplexity), true
+
+	case "ExportResultType.aggregations":
+		if e.complexity.ExportResultType.Aggregations == nil {
+			break
+		}
+
+		return e.complexity.ExportResultType.Aggregations(childComplexity), true
+
 	case "ExportResultType.count":
 		if e.complexity.ExportResultType.Count == nil {
 			break
@@ -292,6 +403,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Exports(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*ExportSortType), args["filter"].(*ExportFilterType)), true
+
+	case "Query._entities":
+		if e.complexity.Query._entities == nil {
+			break
+		}
+
+		args, err := ec.field_Query__entities_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query._entities(childComplexity, args["representations"].([]interface{})), true
 
 	case "Query._service":
 		if e.complexity.Query._service == nil {
@@ -382,8 +505,9 @@ schema {
 
 type Query {
   _service: _Service!
+  _entities(representations: [_Any!]!): [_Entity]!
   export(id: ID, q: String, filter: ExportFilterType): Export
-  exports(offset: Int, limit: Int = 30, q: String, sort: [ExportSortType!], filter: ExportFilterType): ExportResultType
+  exports(offset: Int, limit: Int = 30, q: String, sort: [ExportSortType!], filter: ExportFilterType): ExportResultType!
 }
 
 type Mutation {
@@ -440,131 +564,400 @@ input ExportUpdateInput {
 
 input ExportSortType {
   id: ObjectSortType
+  idMin: ObjectSortType
+  idMax: ObjectSortType
   type: ObjectSortType
+  typeMin: ObjectSortType
+  typeMax: ObjectSortType
   metadata: ObjectSortType
+  metadataMin: ObjectSortType
+  metadataMax: ObjectSortType
   state: ObjectSortType
+  stateMin: ObjectSortType
+  stateMax: ObjectSortType
   progress: ObjectSortType
+  progressMin: ObjectSortType
+  progressMax: ObjectSortType
+  progressAvg: ObjectSortType
+  progressSum: ObjectSortType
   errorDescription: ObjectSortType
+  errorDescriptionMin: ObjectSortType
+  errorDescriptionMax: ObjectSortType
   fileId: ObjectSortType
+  fileIdMin: ObjectSortType
+  fileIdMax: ObjectSortType
   updatedAt: ObjectSortType
+  updatedAtMin: ObjectSortType
+  updatedAtMax: ObjectSortType
   createdAt: ObjectSortType
+  createdAtMin: ObjectSortType
+  createdAtMax: ObjectSortType
   updatedBy: ObjectSortType
+  updatedByMin: ObjectSortType
+  updatedByMax: ObjectSortType
   createdBy: ObjectSortType
+  createdByMin: ObjectSortType
+  createdByMax: ObjectSortType
 }
 
 input ExportFilterType {
   AND: [ExportFilterType!]
   OR: [ExportFilterType!]
   id: ID
+  idMin: ID
+  idMax: ID
   id_ne: ID
+  idMin_ne: ID
+  idMax_ne: ID
   id_gt: ID
+  idMin_gt: ID
+  idMax_gt: ID
   id_lt: ID
+  idMin_lt: ID
+  idMax_lt: ID
   id_gte: ID
+  idMin_gte: ID
+  idMax_gte: ID
   id_lte: ID
+  idMin_lte: ID
+  idMax_lte: ID
   id_in: [ID!]
+  idMin_in: [ID!]
+  idMax_in: [ID!]
+  id_not_in: [ID!]
+  idMin_not_in: [ID!]
+  idMax_not_in: [ID!]
   id_null: Boolean
   type: String
+  typeMin: String
+  typeMax: String
   type_ne: String
+  typeMin_ne: String
+  typeMax_ne: String
   type_gt: String
+  typeMin_gt: String
+  typeMax_gt: String
   type_lt: String
+  typeMin_lt: String
+  typeMax_lt: String
   type_gte: String
+  typeMin_gte: String
+  typeMax_gte: String
   type_lte: String
+  typeMin_lte: String
+  typeMax_lte: String
   type_in: [String!]
+  typeMin_in: [String!]
+  typeMax_in: [String!]
+  type_not_in: [String!]
+  typeMin_not_in: [String!]
+  typeMax_not_in: [String!]
   type_like: String
+  typeMin_like: String
+  typeMax_like: String
   type_prefix: String
+  typeMin_prefix: String
+  typeMax_prefix: String
   type_suffix: String
+  typeMin_suffix: String
+  typeMax_suffix: String
   type_null: Boolean
   metadata: String
+  metadataMin: String
+  metadataMax: String
   metadata_ne: String
+  metadataMin_ne: String
+  metadataMax_ne: String
   metadata_gt: String
+  metadataMin_gt: String
+  metadataMax_gt: String
   metadata_lt: String
+  metadataMin_lt: String
+  metadataMax_lt: String
   metadata_gte: String
+  metadataMin_gte: String
+  metadataMax_gte: String
   metadata_lte: String
+  metadataMin_lte: String
+  metadataMax_lte: String
   metadata_in: [String!]
+  metadataMin_in: [String!]
+  metadataMax_in: [String!]
+  metadata_not_in: [String!]
+  metadataMin_not_in: [String!]
+  metadataMax_not_in: [String!]
   metadata_like: String
+  metadataMin_like: String
+  metadataMax_like: String
   metadata_prefix: String
+  metadataMin_prefix: String
+  metadataMax_prefix: String
   metadata_suffix: String
+  metadataMin_suffix: String
+  metadataMax_suffix: String
   metadata_null: Boolean
   state: ExportState
+  stateMin: ExportState
+  stateMax: ExportState
   state_ne: ExportState
+  stateMin_ne: ExportState
+  stateMax_ne: ExportState
   state_gt: ExportState
+  stateMin_gt: ExportState
+  stateMax_gt: ExportState
   state_lt: ExportState
+  stateMin_lt: ExportState
+  stateMax_lt: ExportState
   state_gte: ExportState
+  stateMin_gte: ExportState
+  stateMax_gte: ExportState
   state_lte: ExportState
+  stateMin_lte: ExportState
+  stateMax_lte: ExportState
   state_in: [ExportState!]
+  stateMin_in: [ExportState!]
+  stateMax_in: [ExportState!]
+  state_not_in: [ExportState!]
+  stateMin_not_in: [ExportState!]
+  stateMax_not_in: [ExportState!]
   state_null: Boolean
   progress: Float
+  progressMin: Float
+  progressMax: Float
+  progressAvg: Float
+  progressSum: Float
   progress_ne: Float
+  progressMin_ne: Float
+  progressMax_ne: Float
+  progressAvg_ne: Float
+  progressSum_ne: Float
   progress_gt: Float
+  progressMin_gt: Float
+  progressMax_gt: Float
+  progressAvg_gt: Float
+  progressSum_gt: Float
   progress_lt: Float
+  progressMin_lt: Float
+  progressMax_lt: Float
+  progressAvg_lt: Float
+  progressSum_lt: Float
   progress_gte: Float
+  progressMin_gte: Float
+  progressMax_gte: Float
+  progressAvg_gte: Float
+  progressSum_gte: Float
   progress_lte: Float
+  progressMin_lte: Float
+  progressMax_lte: Float
+  progressAvg_lte: Float
+  progressSum_lte: Float
   progress_in: [Float!]
+  progressMin_in: [Float!]
+  progressMax_in: [Float!]
+  progressAvg_in: [Float!]
+  progressSum_in: [Float!]
+  progress_not_in: [Float!]
+  progressMin_not_in: [Float!]
+  progressMax_not_in: [Float!]
+  progressAvg_not_in: [Float!]
+  progressSum_not_in: [Float!]
   progress_null: Boolean
   errorDescription: String
+  errorDescriptionMin: String
+  errorDescriptionMax: String
   errorDescription_ne: String
+  errorDescriptionMin_ne: String
+  errorDescriptionMax_ne: String
   errorDescription_gt: String
+  errorDescriptionMin_gt: String
+  errorDescriptionMax_gt: String
   errorDescription_lt: String
+  errorDescriptionMin_lt: String
+  errorDescriptionMax_lt: String
   errorDescription_gte: String
+  errorDescriptionMin_gte: String
+  errorDescriptionMax_gte: String
   errorDescription_lte: String
+  errorDescriptionMin_lte: String
+  errorDescriptionMax_lte: String
   errorDescription_in: [String!]
+  errorDescriptionMin_in: [String!]
+  errorDescriptionMax_in: [String!]
+  errorDescription_not_in: [String!]
+  errorDescriptionMin_not_in: [String!]
+  errorDescriptionMax_not_in: [String!]
   errorDescription_like: String
+  errorDescriptionMin_like: String
+  errorDescriptionMax_like: String
   errorDescription_prefix: String
+  errorDescriptionMin_prefix: String
+  errorDescriptionMax_prefix: String
   errorDescription_suffix: String
+  errorDescriptionMin_suffix: String
+  errorDescriptionMax_suffix: String
   errorDescription_null: Boolean
   fileId: String
+  fileIdMin: String
+  fileIdMax: String
   fileId_ne: String
+  fileIdMin_ne: String
+  fileIdMax_ne: String
   fileId_gt: String
+  fileIdMin_gt: String
+  fileIdMax_gt: String
   fileId_lt: String
+  fileIdMin_lt: String
+  fileIdMax_lt: String
   fileId_gte: String
+  fileIdMin_gte: String
+  fileIdMax_gte: String
   fileId_lte: String
+  fileIdMin_lte: String
+  fileIdMax_lte: String
   fileId_in: [String!]
+  fileIdMin_in: [String!]
+  fileIdMax_in: [String!]
+  fileId_not_in: [String!]
+  fileIdMin_not_in: [String!]
+  fileIdMax_not_in: [String!]
   fileId_like: String
+  fileIdMin_like: String
+  fileIdMax_like: String
   fileId_prefix: String
+  fileIdMin_prefix: String
+  fileIdMax_prefix: String
   fileId_suffix: String
+  fileIdMin_suffix: String
+  fileIdMax_suffix: String
   fileId_null: Boolean
   updatedAt: Time
+  updatedAtMin: Time
+  updatedAtMax: Time
   updatedAt_ne: Time
+  updatedAtMin_ne: Time
+  updatedAtMax_ne: Time
   updatedAt_gt: Time
+  updatedAtMin_gt: Time
+  updatedAtMax_gt: Time
   updatedAt_lt: Time
+  updatedAtMin_lt: Time
+  updatedAtMax_lt: Time
   updatedAt_gte: Time
+  updatedAtMin_gte: Time
+  updatedAtMax_gte: Time
   updatedAt_lte: Time
+  updatedAtMin_lte: Time
+  updatedAtMax_lte: Time
   updatedAt_in: [Time!]
+  updatedAtMin_in: [Time!]
+  updatedAtMax_in: [Time!]
+  updatedAt_not_in: [Time!]
+  updatedAtMin_not_in: [Time!]
+  updatedAtMax_not_in: [Time!]
   updatedAt_null: Boolean
   createdAt: Time
+  createdAtMin: Time
+  createdAtMax: Time
   createdAt_ne: Time
+  createdAtMin_ne: Time
+  createdAtMax_ne: Time
   createdAt_gt: Time
+  createdAtMin_gt: Time
+  createdAtMax_gt: Time
   createdAt_lt: Time
+  createdAtMin_lt: Time
+  createdAtMax_lt: Time
   createdAt_gte: Time
+  createdAtMin_gte: Time
+  createdAtMax_gte: Time
   createdAt_lte: Time
+  createdAtMin_lte: Time
+  createdAtMax_lte: Time
   createdAt_in: [Time!]
+  createdAtMin_in: [Time!]
+  createdAtMax_in: [Time!]
+  createdAt_not_in: [Time!]
+  createdAtMin_not_in: [Time!]
+  createdAtMax_not_in: [Time!]
   createdAt_null: Boolean
   updatedBy: ID
+  updatedByMin: ID
+  updatedByMax: ID
   updatedBy_ne: ID
+  updatedByMin_ne: ID
+  updatedByMax_ne: ID
   updatedBy_gt: ID
+  updatedByMin_gt: ID
+  updatedByMax_gt: ID
   updatedBy_lt: ID
+  updatedByMin_lt: ID
+  updatedByMax_lt: ID
   updatedBy_gte: ID
+  updatedByMin_gte: ID
+  updatedByMax_gte: ID
   updatedBy_lte: ID
+  updatedByMin_lte: ID
+  updatedByMax_lte: ID
   updatedBy_in: [ID!]
+  updatedByMin_in: [ID!]
+  updatedByMax_in: [ID!]
+  updatedBy_not_in: [ID!]
+  updatedByMin_not_in: [ID!]
+  updatedByMax_not_in: [ID!]
   updatedBy_null: Boolean
   createdBy: ID
+  createdByMin: ID
+  createdByMax: ID
   createdBy_ne: ID
+  createdByMin_ne: ID
+  createdByMax_ne: ID
   createdBy_gt: ID
+  createdByMin_gt: ID
+  createdByMax_gt: ID
   createdBy_lt: ID
+  createdByMin_lt: ID
+  createdByMax_lt: ID
   createdBy_gte: ID
+  createdByMin_gte: ID
+  createdByMax_gte: ID
   createdBy_lte: ID
+  createdByMin_lte: ID
+  createdByMax_lte: ID
   createdBy_in: [ID!]
+  createdByMin_in: [ID!]
+  createdByMax_in: [ID!]
+  createdBy_not_in: [ID!]
+  createdByMin_not_in: [ID!]
+  createdByMax_not_in: [ID!]
   createdBy_null: Boolean
 }
 
 type ExportResultType {
   items: [Export!]!
   count: Int!
+  aggregations: ExportResultAggregations!
+}
+
+type ExportResultAggregations {
+  typeMin: String
+  typeMax: String
+  metadataMin: String
+  metadataMax: String
+  progressMin: Float
+  progressMax: Float
+  progressAvg: Float
+  progressSum: Float
+  errorDescriptionMin: String
+  errorDescriptionMax: String
+  fileIdMin: String
+  fileIdMax: String
 }
 
 type _Service {
   sdl: String
 }
+
+union _Entity = File
 
 type File {
   id: ID!
@@ -640,6 +1033,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []interface{}
+	if tmp, ok := rawArgs["representations"]; ok {
+		arg0, err = ec.unmarshalN_Any2ᚕinterfaceᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["representations"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_export_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -699,7 +1106,7 @@ func (ec *executionContext) field_Query_exports_args(ctx context.Context, rawArg
 	args["q"] = arg2
 	var arg3 []*ExportSortType
 	if tmp, ok := rawArgs["sort"]; ok {
-		arg3, err = ec.unmarshalOExportSortType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportSortType(ctx, tmp)
+		arg3, err = ec.unmarshalOExportSortType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportSortTypeᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1166,6 +1573,414 @@ func (ec *executionContext) _Export_createdBy(ctx context.Context, field graphql
 	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _ExportResultAggregations_typeMin(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TypeMin, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_typeMax(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TypeMax, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_metadataMin(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MetadataMin, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_metadataMax(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MetadataMax, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_progressMin(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProgressMin, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_progressMax(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProgressMax, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_progressAvg(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProgressAvg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_progressSum(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProgressSum, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_errorDescriptionMin(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ErrorDescriptionMin, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_errorDescriptionMax(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ErrorDescriptionMax, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_fileIdMin(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FileIDMin, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultAggregations_fileIdMax(ctx context.Context, field graphql.CollectedField, obj *ExportResultAggregations) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultAggregations",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FileIDMax, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ExportResultType_items(ctx context.Context, field graphql.CollectedField, obj *ExportResultType) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1200,7 +2015,7 @@ func (ec *executionContext) _ExportResultType_items(ctx context.Context, field g
 	res := resTmp.([]*Export)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNExport2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExport(ctx, field.Selections, res)
+	return ec.marshalNExport2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ExportResultType_count(ctx context.Context, field graphql.CollectedField, obj *ExportResultType) (ret graphql.Marshaler) {
@@ -1238,6 +2053,43 @@ func (ec *executionContext) _ExportResultType_count(ctx context.Context, field g
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExportResultType_aggregations(ctx context.Context, field graphql.CollectedField, obj *ExportResultType) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ExportResultType",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ExportResultType().Aggregations(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ExportResultAggregations)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNExportResultAggregations2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultAggregations(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _File_id(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
@@ -1483,6 +2335,50 @@ func (ec *executionContext) _Query__service(ctx context.Context, field graphql.C
 	return ec.marshalN_Service2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐ_Service(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query__entities(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query__entities_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query()._entities(rctx, args["representations"].([]interface{}))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]_Entity)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalN_Entity2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐ_Entity(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_export(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1557,12 +2453,15 @@ func (ec *executionContext) _Query_exports(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ExportResultType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOExportResultType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultType(ctx, field.Selections, res)
+	return ec.marshalNExportResultType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1779,7 +2678,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__DirectiveLocation2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalN__DirectiveLocation2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -1816,7 +2715,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, field.Selections, res)
+	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -2066,7 +2965,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, field.Selections, res)
+	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -2353,7 +3252,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
+	return ec.marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
@@ -2495,7 +3394,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	res := resTmp.([]introspection.Directive)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx, field.Selections, res)
+	return ec.marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -2641,7 +3540,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	res := resTmp.([]introspection.Field)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx, field.Selections, res)
+	return ec.marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -2675,7 +3574,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
+	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -2709,7 +3608,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
+	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -2750,7 +3649,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	res := resTmp.([]introspection.EnumValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx, field.Selections, res)
+	return ec.marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -2784,7 +3683,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, field.Selections, res)
+	return ec.marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -2833,13 +3732,13 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 		switch k {
 		case "AND":
 			var err error
-			it.And, err = ec.unmarshalOExportFilterType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportFilterType(ctx, v)
+			it.And, err = ec.unmarshalOExportFilterType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "OR":
 			var err error
-			it.Or, err = ec.unmarshalOExportFilterType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportFilterType(ctx, v)
+			it.Or, err = ec.unmarshalOExportFilterType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2849,9 +3748,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_ne":
 			var err error
 			it.IDNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_ne":
+			var err error
+			it.IDMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_ne":
+			var err error
+			it.IDMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2861,9 +3784,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gt":
+			var err error
+			it.IDMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gt":
+			var err error
+			it.IDMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lt":
 			var err error
 			it.IDLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_lt":
+			var err error
+			it.IDMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lt":
+			var err error
+			it.IDMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2873,15 +3820,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gte":
+			var err error
+			it.IDMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gte":
+			var err error
+			it.IDMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lte":
 			var err error
 			it.IDLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "idMin_lte":
+			var err error
+			it.IDMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lte":
+			var err error
+			it.IDMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_in":
 			var err error
-			it.IDIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.IDIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_in":
+			var err error
+			it.IDMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_in":
+			var err error
+			it.IDMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "id_not_in":
+			var err error
+			it.IDNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_not_in":
+			var err error
+			it.IDMinNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_not_in":
+			var err error
+			it.IDMaxNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2897,9 +3898,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "typeMin":
+			var err error
+			it.TypeMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax":
+			var err error
+			it.TypeMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_ne":
 			var err error
 			it.TypeNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_ne":
+			var err error
+			it.TypeMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_ne":
+			var err error
+			it.TypeMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2909,9 +3934,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_gt":
+			var err error
+			it.TypeMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_gt":
+			var err error
+			it.TypeMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_lt":
 			var err error
 			it.TypeLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_lt":
+			var err error
+			it.TypeMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_lt":
+			var err error
+			it.TypeMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2921,15 +3970,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_gte":
+			var err error
+			it.TypeMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_gte":
+			var err error
+			it.TypeMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_lte":
 			var err error
 			it.TypeLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_lte":
+			var err error
+			it.TypeMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_lte":
+			var err error
+			it.TypeMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_in":
 			var err error
-			it.TypeIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.TypeIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_in":
+			var err error
+			it.TypeMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_in":
+			var err error
+			it.TypeMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type_not_in":
+			var err error
+			it.TypeNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_not_in":
+			var err error
+			it.TypeMinNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_not_in":
+			var err error
+			it.TypeMaxNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2939,15 +4042,51 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_like":
+			var err error
+			it.TypeMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_like":
+			var err error
+			it.TypeMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_prefix":
 			var err error
 			it.TypePrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_prefix":
+			var err error
+			it.TypeMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_prefix":
+			var err error
+			it.TypeMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_suffix":
 			var err error
 			it.TypeSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_suffix":
+			var err error
+			it.TypeMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_suffix":
+			var err error
+			it.TypeMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2963,9 +4102,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "metadataMin":
+			var err error
+			it.MetadataMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax":
+			var err error
+			it.MetadataMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "metadata_ne":
 			var err error
 			it.MetadataNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMin_ne":
+			var err error
+			it.MetadataMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_ne":
+			var err error
+			it.MetadataMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2975,9 +4138,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "metadataMin_gt":
+			var err error
+			it.MetadataMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_gt":
+			var err error
+			it.MetadataMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "metadata_lt":
 			var err error
 			it.MetadataLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMin_lt":
+			var err error
+			it.MetadataMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_lt":
+			var err error
+			it.MetadataMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2987,15 +4174,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "metadataMin_gte":
+			var err error
+			it.MetadataMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_gte":
+			var err error
+			it.MetadataMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "metadata_lte":
 			var err error
 			it.MetadataLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "metadataMin_lte":
+			var err error
+			it.MetadataMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_lte":
+			var err error
+			it.MetadataMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "metadata_in":
 			var err error
-			it.MetadataIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.MetadataIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMin_in":
+			var err error
+			it.MetadataMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_in":
+			var err error
+			it.MetadataMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadata_not_in":
+			var err error
+			it.MetadataNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMin_not_in":
+			var err error
+			it.MetadataMinNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_not_in":
+			var err error
+			it.MetadataMaxNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3005,15 +4246,51 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "metadataMin_like":
+			var err error
+			it.MetadataMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_like":
+			var err error
+			it.MetadataMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "metadata_prefix":
 			var err error
 			it.MetadataPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "metadataMin_prefix":
+			var err error
+			it.MetadataMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_prefix":
+			var err error
+			it.MetadataMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "metadata_suffix":
 			var err error
 			it.MetadataSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMin_suffix":
+			var err error
+			it.MetadataMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax_suffix":
+			var err error
+			it.MetadataMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3029,9 +4306,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "stateMin":
+			var err error
+			it.StateMin, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax":
+			var err error
+			it.StateMax, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "state_ne":
 			var err error
 			it.StateNe, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMin_ne":
+			var err error
+			it.StateMinNe, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax_ne":
+			var err error
+			it.StateMaxNe, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3041,9 +4342,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "stateMin_gt":
+			var err error
+			it.StateMinGt, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax_gt":
+			var err error
+			it.StateMaxGt, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "state_lt":
 			var err error
 			it.StateLt, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMin_lt":
+			var err error
+			it.StateMinLt, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax_lt":
+			var err error
+			it.StateMaxLt, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3053,15 +4378,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "stateMin_gte":
+			var err error
+			it.StateMinGte, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax_gte":
+			var err error
+			it.StateMaxGte, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "state_lte":
 			var err error
 			it.StateLte, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "stateMin_lte":
+			var err error
+			it.StateMinLte, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax_lte":
+			var err error
+			it.StateMaxLte, err = ec.unmarshalOExportState2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "state_in":
 			var err error
-			it.StateIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx, v)
+			it.StateIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMin_in":
+			var err error
+			it.StateMinIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax_in":
+			var err error
+			it.StateMaxIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "state_not_in":
+			var err error
+			it.StateNotIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMin_not_in":
+			var err error
+			it.StateMinNotIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax_not_in":
+			var err error
+			it.StateMaxNotIn, err = ec.unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3077,9 +4456,57 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "progressMin":
+			var err error
+			it.ProgressMin, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax":
+			var err error
+			it.ProgressMax, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg":
+			var err error
+			it.ProgressAvg, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum":
+			var err error
+			it.ProgressSum, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "progress_ne":
 			var err error
 			it.ProgressNe, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMin_ne":
+			var err error
+			it.ProgressMinNe, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax_ne":
+			var err error
+			it.ProgressMaxNe, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg_ne":
+			var err error
+			it.ProgressAvgNe, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum_ne":
+			var err error
+			it.ProgressSumNe, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3089,9 +4516,57 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "progressMin_gt":
+			var err error
+			it.ProgressMinGt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax_gt":
+			var err error
+			it.ProgressMaxGt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg_gt":
+			var err error
+			it.ProgressAvgGt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum_gt":
+			var err error
+			it.ProgressSumGt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "progress_lt":
 			var err error
 			it.ProgressLt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMin_lt":
+			var err error
+			it.ProgressMinLt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax_lt":
+			var err error
+			it.ProgressMaxLt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg_lt":
+			var err error
+			it.ProgressAvgLt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum_lt":
+			var err error
+			it.ProgressSumLt, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3101,15 +4576,117 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "progressMin_gte":
+			var err error
+			it.ProgressMinGte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax_gte":
+			var err error
+			it.ProgressMaxGte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg_gte":
+			var err error
+			it.ProgressAvgGte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum_gte":
+			var err error
+			it.ProgressSumGte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "progress_lte":
 			var err error
 			it.ProgressLte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "progressMin_lte":
+			var err error
+			it.ProgressMinLte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax_lte":
+			var err error
+			it.ProgressMaxLte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg_lte":
+			var err error
+			it.ProgressAvgLte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum_lte":
+			var err error
+			it.ProgressSumLte, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "progress_in":
 			var err error
-			it.ProgressIn, err = ec.unmarshalOFloat2ᚕfloat64(ctx, v)
+			it.ProgressIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMin_in":
+			var err error
+			it.ProgressMinIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax_in":
+			var err error
+			it.ProgressMaxIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg_in":
+			var err error
+			it.ProgressAvgIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum_in":
+			var err error
+			it.ProgressSumIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progress_not_in":
+			var err error
+			it.ProgressNotIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMin_not_in":
+			var err error
+			it.ProgressMinNotIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax_not_in":
+			var err error
+			it.ProgressMaxNotIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg_not_in":
+			var err error
+			it.ProgressAvgNotIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum_not_in":
+			var err error
+			it.ProgressSumNotIn, err = ec.unmarshalOFloat2ᚕfloat64ᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3125,9 +4702,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "errorDescriptionMin":
+			var err error
+			it.ErrorDescriptionMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax":
+			var err error
+			it.ErrorDescriptionMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription_ne":
 			var err error
 			it.ErrorDescriptionNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMin_ne":
+			var err error
+			it.ErrorDescriptionMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_ne":
+			var err error
+			it.ErrorDescriptionMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3137,9 +4738,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "errorDescriptionMin_gt":
+			var err error
+			it.ErrorDescriptionMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_gt":
+			var err error
+			it.ErrorDescriptionMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription_lt":
 			var err error
 			it.ErrorDescriptionLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMin_lt":
+			var err error
+			it.ErrorDescriptionMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_lt":
+			var err error
+			it.ErrorDescriptionMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3149,15 +4774,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "errorDescriptionMin_gte":
+			var err error
+			it.ErrorDescriptionMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_gte":
+			var err error
+			it.ErrorDescriptionMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription_lte":
 			var err error
 			it.ErrorDescriptionLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "errorDescriptionMin_lte":
+			var err error
+			it.ErrorDescriptionMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_lte":
+			var err error
+			it.ErrorDescriptionMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription_in":
 			var err error
-			it.ErrorDescriptionIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.ErrorDescriptionIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMin_in":
+			var err error
+			it.ErrorDescriptionMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_in":
+			var err error
+			it.ErrorDescriptionMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescription_not_in":
+			var err error
+			it.ErrorDescriptionNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMin_not_in":
+			var err error
+			it.ErrorDescriptionMinNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_not_in":
+			var err error
+			it.ErrorDescriptionMaxNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3167,15 +4846,51 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "errorDescriptionMin_like":
+			var err error
+			it.ErrorDescriptionMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_like":
+			var err error
+			it.ErrorDescriptionMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription_prefix":
 			var err error
 			it.ErrorDescriptionPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "errorDescriptionMin_prefix":
+			var err error
+			it.ErrorDescriptionMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_prefix":
+			var err error
+			it.ErrorDescriptionMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription_suffix":
 			var err error
 			it.ErrorDescriptionSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMin_suffix":
+			var err error
+			it.ErrorDescriptionMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax_suffix":
+			var err error
+			it.ErrorDescriptionMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3191,9 +4906,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "fileIdMin":
+			var err error
+			it.FileIDMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax":
+			var err error
+			it.FileIDMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId_ne":
 			var err error
 			it.FileIDNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMin_ne":
+			var err error
+			it.FileIDMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_ne":
+			var err error
+			it.FileIDMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3203,9 +4942,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "fileIdMin_gt":
+			var err error
+			it.FileIDMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_gt":
+			var err error
+			it.FileIDMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId_lt":
 			var err error
 			it.FileIDLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMin_lt":
+			var err error
+			it.FileIDMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_lt":
+			var err error
+			it.FileIDMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3215,15 +4978,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "fileIdMin_gte":
+			var err error
+			it.FileIDMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_gte":
+			var err error
+			it.FileIDMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId_lte":
 			var err error
 			it.FileIDLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "fileIdMin_lte":
+			var err error
+			it.FileIDMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_lte":
+			var err error
+			it.FileIDMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId_in":
 			var err error
-			it.FileIDIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.FileIDIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMin_in":
+			var err error
+			it.FileIDMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_in":
+			var err error
+			it.FileIDMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileId_not_in":
+			var err error
+			it.FileIDNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMin_not_in":
+			var err error
+			it.FileIDMinNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_not_in":
+			var err error
+			it.FileIDMaxNotIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3233,15 +5050,51 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "fileIdMin_like":
+			var err error
+			it.FileIDMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_like":
+			var err error
+			it.FileIDMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId_prefix":
 			var err error
 			it.FileIDPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "fileIdMin_prefix":
+			var err error
+			it.FileIDMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_prefix":
+			var err error
+			it.FileIDMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "fileId_suffix":
 			var err error
 			it.FileIDSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMin_suffix":
+			var err error
+			it.FileIDMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax_suffix":
+			var err error
+			it.FileIDMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3257,9 +5110,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_ne":
 			var err error
 			it.UpdatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_ne":
+			var err error
+			it.UpdatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_ne":
+			var err error
+			it.UpdatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3269,9 +5146,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gt":
+			var err error
+			it.UpdatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gt":
+			var err error
+			it.UpdatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lt":
 			var err error
 			it.UpdatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_lt":
+			var err error
+			it.UpdatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lt":
+			var err error
+			it.UpdatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3281,15 +5182,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gte":
+			var err error
+			it.UpdatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gte":
+			var err error
+			it.UpdatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lte":
 			var err error
 			it.UpdatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_lte":
+			var err error
+			it.UpdatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lte":
+			var err error
+			it.UpdatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_in":
 			var err error
-			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_in":
+			var err error
+			it.UpdatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_in":
+			var err error
+			it.UpdatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAt_not_in":
+			var err error
+			it.UpdatedAtNotIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_not_in":
+			var err error
+			it.UpdatedAtMinNotIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_not_in":
+			var err error
+			it.UpdatedAtMaxNotIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3305,9 +5260,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_ne":
 			var err error
 			it.CreatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_ne":
+			var err error
+			it.CreatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_ne":
+			var err error
+			it.CreatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3317,9 +5296,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gt":
+			var err error
+			it.CreatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gt":
+			var err error
+			it.CreatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lt":
 			var err error
 			it.CreatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_lt":
+			var err error
+			it.CreatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lt":
+			var err error
+			it.CreatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3329,15 +5332,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gte":
+			var err error
+			it.CreatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gte":
+			var err error
+			it.CreatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lte":
 			var err error
 			it.CreatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_lte":
+			var err error
+			it.CreatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lte":
+			var err error
+			it.CreatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_in":
 			var err error
-			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_in":
+			var err error
+			it.CreatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_in":
+			var err error
+			it.CreatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAt_not_in":
+			var err error
+			it.CreatedAtNotIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_not_in":
+			var err error
+			it.CreatedAtMinNotIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_not_in":
+			var err error
+			it.CreatedAtMaxNotIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3353,9 +5410,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_ne":
 			var err error
 			it.UpdatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_ne":
+			var err error
+			it.UpdatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_ne":
+			var err error
+			it.UpdatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3365,9 +5446,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gt":
+			var err error
+			it.UpdatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gt":
+			var err error
+			it.UpdatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lt":
 			var err error
 			it.UpdatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_lt":
+			var err error
+			it.UpdatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lt":
+			var err error
+			it.UpdatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3377,15 +5482,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gte":
+			var err error
+			it.UpdatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gte":
+			var err error
+			it.UpdatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lte":
 			var err error
 			it.UpdatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_lte":
+			var err error
+			it.UpdatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lte":
+			var err error
+			it.UpdatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_in":
 			var err error
-			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_in":
+			var err error
+			it.UpdatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_in":
+			var err error
+			it.UpdatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedBy_not_in":
+			var err error
+			it.UpdatedByNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_not_in":
+			var err error
+			it.UpdatedByMinNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_not_in":
+			var err error
+			it.UpdatedByMaxNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3401,9 +5560,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_ne":
 			var err error
 			it.CreatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_ne":
+			var err error
+			it.CreatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_ne":
+			var err error
+			it.CreatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3413,9 +5596,33 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gt":
+			var err error
+			it.CreatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gt":
+			var err error
+			it.CreatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lt":
 			var err error
 			it.CreatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_lt":
+			var err error
+			it.CreatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lt":
+			var err error
+			it.CreatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3425,15 +5632,69 @@ func (ec *executionContext) unmarshalInputExportFilterType(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gte":
+			var err error
+			it.CreatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gte":
+			var err error
+			it.CreatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lte":
 			var err error
 			it.CreatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_lte":
+			var err error
+			it.CreatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lte":
+			var err error
+			it.CreatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_in":
 			var err error
-			it.CreatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.CreatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_in":
+			var err error
+			it.CreatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_in":
+			var err error
+			it.CreatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdBy_not_in":
+			var err error
+			it.CreatedByNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_not_in":
+			var err error
+			it.CreatedByMinNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_not_in":
+			var err error
+			it.CreatedByMaxNotIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3461,9 +5722,33 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type":
 			var err error
 			it.Type, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin":
+			var err error
+			it.TypeMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax":
+			var err error
+			it.TypeMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3473,9 +5758,33 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "metadataMin":
+			var err error
+			it.MetadataMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "metadataMax":
+			var err error
+			it.MetadataMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "state":
 			var err error
 			it.State, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMin":
+			var err error
+			it.StateMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "stateMax":
+			var err error
+			it.StateMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3485,9 +5794,45 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "progressMin":
+			var err error
+			it.ProgressMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressMax":
+			var err error
+			it.ProgressMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressAvg":
+			var err error
+			it.ProgressAvg, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "progressSum":
+			var err error
+			it.ProgressSum, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "errorDescription":
 			var err error
 			it.ErrorDescription, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMin":
+			var err error
+			it.ErrorDescriptionMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "errorDescriptionMax":
+			var err error
+			it.ErrorDescriptionMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3497,9 +5842,33 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "fileIdMin":
+			var err error
+			it.FileIDMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fileIdMax":
+			var err error
+			it.FileIDMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt":
 			var err error
 			it.UpdatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3509,15 +5878,51 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy":
 			var err error
 			it.UpdatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy":
 			var err error
 			it.CreatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3530,6 +5935,22 @@ func (ec *executionContext) unmarshalInputExportSortType(ctx context.Context, ob
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
+
+func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, obj _Entity) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case File:
+		return ec._File(ctx, sel, &obj)
+	case *File:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._File(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
 
 // endregion ************************** interface.gotpl ***************************
 
@@ -3596,6 +6017,52 @@ func (ec *executionContext) _Export(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var exportResultAggregationsImplementors = []string{"ExportResultAggregations"}
+
+func (ec *executionContext) _ExportResultAggregations(ctx context.Context, sel ast.SelectionSet, obj *ExportResultAggregations) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, exportResultAggregationsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExportResultAggregations")
+		case "typeMin":
+			out.Values[i] = ec._ExportResultAggregations_typeMin(ctx, field, obj)
+		case "typeMax":
+			out.Values[i] = ec._ExportResultAggregations_typeMax(ctx, field, obj)
+		case "metadataMin":
+			out.Values[i] = ec._ExportResultAggregations_metadataMin(ctx, field, obj)
+		case "metadataMax":
+			out.Values[i] = ec._ExportResultAggregations_metadataMax(ctx, field, obj)
+		case "progressMin":
+			out.Values[i] = ec._ExportResultAggregations_progressMin(ctx, field, obj)
+		case "progressMax":
+			out.Values[i] = ec._ExportResultAggregations_progressMax(ctx, field, obj)
+		case "progressAvg":
+			out.Values[i] = ec._ExportResultAggregations_progressAvg(ctx, field, obj)
+		case "progressSum":
+			out.Values[i] = ec._ExportResultAggregations_progressSum(ctx, field, obj)
+		case "errorDescriptionMin":
+			out.Values[i] = ec._ExportResultAggregations_errorDescriptionMin(ctx, field, obj)
+		case "errorDescriptionMax":
+			out.Values[i] = ec._ExportResultAggregations_errorDescriptionMax(ctx, field, obj)
+		case "fileIdMin":
+			out.Values[i] = ec._ExportResultAggregations_fileIdMin(ctx, field, obj)
+		case "fileIdMax":
+			out.Values[i] = ec._ExportResultAggregations_fileIdMax(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var exportResultTypeImplementors = []string{"ExportResultType"}
 
 func (ec *executionContext) _ExportResultType(ctx context.Context, sel ast.SelectionSet, obj *ExportResultType) graphql.Marshaler {
@@ -3635,6 +6102,20 @@ func (ec *executionContext) _ExportResultType(ctx context.Context, sel ast.Selec
 				}
 				return res
 			})
+		case "aggregations":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ExportResultType_aggregations(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3646,7 +6127,7 @@ func (ec *executionContext) _ExportResultType(ctx context.Context, sel ast.Selec
 	return out
 }
 
-var fileImplementors = []string{"File"}
+var fileImplementors = []string{"File", "_Entity"}
 
 func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *File) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, fileImplementors)
@@ -3748,6 +6229,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "_entities":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query__entities(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "export":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -3768,6 +6263,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_exports(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "__type":
@@ -4072,7 +6570,7 @@ func (ec *executionContext) marshalNExport2githubᚗcomᚋgraphqlᚑservicesᚋg
 	return ec._Export(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNExport2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExport(ctx context.Context, sel ast.SelectionSet, v []*Export) graphql.Marshaler {
+func (ec *executionContext) marshalNExport2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportᚄ(ctx context.Context, sel ast.SelectionSet, v []*Export) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4136,6 +6634,34 @@ func (ec *executionContext) unmarshalNExportFilterType2ᚖgithubᚗcomᚋgraphql
 	}
 	res, err := ec.unmarshalNExportFilterType2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportFilterType(ctx, v)
 	return &res, err
+}
+
+func (ec *executionContext) marshalNExportResultAggregations2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultAggregations(ctx context.Context, sel ast.SelectionSet, v ExportResultAggregations) graphql.Marshaler {
+	return ec._ExportResultAggregations(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNExportResultAggregations2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultAggregations(ctx context.Context, sel ast.SelectionSet, v *ExportResultAggregations) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ExportResultAggregations(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNExportResultType2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultType(ctx context.Context, sel ast.SelectionSet, v ExportResultType) graphql.Marshaler {
+	return ec._ExportResultType(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNExportResultType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultType(ctx context.Context, sel ast.SelectionSet, v *ExportResultType) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ExportResultType(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNExportSortType2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportSortType(ctx context.Context, v interface{}) (ExportSortType, error) {
@@ -4254,6 +6780,95 @@ func (ec *executionContext) marshalNTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return ec.marshalNTime2timeᚐTime(ctx, sel, *v)
 }
 
+func (ec *executionContext) unmarshalN_Any2interface(ctx context.Context, v interface{}) (interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	return Unmarshal_Any(v)
+}
+
+func (ec *executionContext) marshalN_Any2interface(ctx context.Context, sel ast.SelectionSet, v interface{}) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := Marshal_Any(v)
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalN_Any2ᚕinterfaceᚄ(ctx context.Context, v interface{}) ([]interface{}, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]interface{}, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalN_Any2interface(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalN_Any2ᚕinterfaceᚄ(ctx context.Context, sel ast.SelectionSet, v []interface{}) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalN_Any2interface(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐ_Entity(ctx context.Context, sel ast.SelectionSet, v []_Entity) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalO_Entity2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐ_Entity(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalN_Service2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐ_Service(ctx context.Context, sel ast.SelectionSet, v _Service) graphql.Marshaler {
 	return ec.__Service(ctx, sel, &v)
 }
@@ -4272,7 +6887,7 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 	return ec.___Directive(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
+func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4323,7 +6938,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	return res
 }
 
-func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4343,7 +6958,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(ctx context.
 	return res, nil
 }
 
-func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4392,7 +7007,7 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 	return ec.___InputValue(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4433,7 +7048,7 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 	return ec.___Type(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4532,7 +7147,7 @@ func (ec *executionContext) unmarshalOExportFilterType2githubᚗcomᚋgraphqlᚑ
 	return ec.unmarshalInputExportFilterType(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOExportFilterType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportFilterType(ctx context.Context, v interface{}) ([]*ExportFilterType, error) {
+func (ec *executionContext) unmarshalOExportFilterType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportFilterTypeᚄ(ctx context.Context, v interface{}) ([]*ExportFilterType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4560,18 +7175,7 @@ func (ec *executionContext) unmarshalOExportFilterType2ᚖgithubᚗcomᚋgraphql
 	return &res, err
 }
 
-func (ec *executionContext) marshalOExportResultType2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultType(ctx context.Context, sel ast.SelectionSet, v ExportResultType) graphql.Marshaler {
-	return ec._ExportResultType(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOExportResultType2ᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportResultType(ctx context.Context, sel ast.SelectionSet, v *ExportResultType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ExportResultType(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOExportSortType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportSortType(ctx context.Context, v interface{}) ([]*ExportSortType, error) {
+func (ec *executionContext) unmarshalOExportSortType2ᚕᚖgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportSortTypeᚄ(ctx context.Context, v interface{}) ([]*ExportSortType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4600,7 +7204,7 @@ func (ec *executionContext) marshalOExportState2githubᚗcomᚋgraphqlᚑservice
 	return v
 }
 
-func (ec *executionContext) unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, v interface{}) ([]ExportState, error) {
+func (ec *executionContext) unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx context.Context, v interface{}) ([]ExportState, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4620,7 +7224,7 @@ func (ec *executionContext) unmarshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑse
 	return res, nil
 }
 
-func (ec *executionContext) marshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportState(ctx context.Context, sel ast.SelectionSet, v []ExportState) graphql.Marshaler {
+func (ec *executionContext) marshalOExportState2ᚕgithubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐExportStateᚄ(ctx context.Context, sel ast.SelectionSet, v []ExportState) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4694,7 +7298,7 @@ func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.S
 	return graphql.MarshalFloat(v)
 }
 
-func (ec *executionContext) unmarshalOFloat2ᚕfloat64(ctx context.Context, v interface{}) ([]float64, error) {
+func (ec *executionContext) unmarshalOFloat2ᚕfloat64ᚄ(ctx context.Context, v interface{}) ([]float64, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4714,7 +7318,7 @@ func (ec *executionContext) unmarshalOFloat2ᚕfloat64(ctx context.Context, v in
 	return res, nil
 }
 
-func (ec *executionContext) marshalOFloat2ᚕfloat64(ctx context.Context, sel ast.SelectionSet, v []float64) graphql.Marshaler {
+func (ec *executionContext) marshalOFloat2ᚕfloat64ᚄ(ctx context.Context, sel ast.SelectionSet, v []float64) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4749,7 +7353,7 @@ func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.Selec
 	return graphql.MarshalID(v)
 }
 
-func (ec *executionContext) unmarshalOID2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalOID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4769,7 +7373,7 @@ func (ec *executionContext) unmarshalOID2ᚕstring(ctx context.Context, v interf
 	return res, nil
 }
 
-func (ec *executionContext) marshalOID2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalOID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4851,7 +7455,7 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4871,7 +7475,7 @@ func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v in
 	return res, nil
 }
 
-func (ec *executionContext) marshalOString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4906,7 +7510,7 @@ func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel as
 	return graphql.MarshalTime(v)
 }
 
-func (ec *executionContext) unmarshalOTime2ᚕᚖtimeᚐTime(ctx context.Context, v interface{}) ([]*time.Time, error) {
+func (ec *executionContext) unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx context.Context, v interface{}) ([]*time.Time, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -4926,7 +7530,7 @@ func (ec *executionContext) unmarshalOTime2ᚕᚖtimeᚐTime(ctx context.Context
 	return res, nil
 }
 
-func (ec *executionContext) marshalOTime2ᚕᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v []*time.Time) graphql.Marshaler {
+func (ec *executionContext) marshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx context.Context, sel ast.SelectionSet, v []*time.Time) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4953,7 +7557,14 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return ec.marshalOTime2timeᚐTime(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
+func (ec *executionContext) marshalO_Entity2githubᚗcomᚋgraphqlᚑservicesᚋgraphqlᚑexportsᚋgenᚐ_Entity(ctx context.Context, sel ast.SelectionSet, v _Entity) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.__Entity(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4993,7 +7604,7 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	return ret
 }
 
-func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx context.Context, sel ast.SelectionSet, v []introspection.Field) graphql.Marshaler {
+func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Field) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5033,7 +7644,7 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	return ret
 }
 
-func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5088,7 +7699,7 @@ func (ec *executionContext) marshalO__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 	return ec.___Type(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

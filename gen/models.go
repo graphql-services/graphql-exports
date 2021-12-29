@@ -9,18 +9,12 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-type NotFoundError struct {
-	Entity string
-}
-
-func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("%s not found", e.Entity)
-}
-
+// ExportResultType ...
 type ExportResultType struct {
 	EntityResultType
 }
 
+// Export ...
 type Export struct {
 	ID               string       `json:"id" gorm:"column:id;primary_key"`
 	Type             *string      `json:"type" gorm:"column:type"`
@@ -35,8 +29,10 @@ type Export struct {
 	CreatedBy        *string      `json:"createdBy" gorm:"column:createdBy"`
 }
 
+// Is_Entity ...
 func (m *Export) Is_Entity() {}
 
+// ExportChanges ...
 type ExportChanges struct {
 	ID               string
 	Type             *string
@@ -51,7 +47,7 @@ type ExportChanges struct {
 	CreatedBy        *string
 }
 
-// used to convert map[string]interface{} to EntityChanges struct
+// ApplyChanges used to convert map[string]interface{} to EntityChanges struct
 func ApplyChanges(changes map[string]interface{}, to interface{}) error {
 	dec, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		ErrorUnused: true,

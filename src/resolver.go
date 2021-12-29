@@ -2,10 +2,9 @@ package src
 
 import (
 	"github.com/graphql-services/graphql-exports/gen"
-	"github.com/novacloudcz/graphql-orm/events"
 )
 
-func New(db *gen.DB, ec *events.EventController) *Resolver {
+func New(db *gen.DB, ec *gen.EventController) *Resolver {
 	resolver := NewResolver(db, ec)
 
 	// resolver.Handlers.CreateUser = func(ctx context.Context, r *gen.GeneratedMutationResolver, input map[string]interface{}) (item *gen.Company, err error) {

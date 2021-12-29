@@ -7,6 +7,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+// Marshal_Any ...
 func Marshal_Any(v interface{}) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
 		err := json.NewEncoder(w).Encode(v)
@@ -16,6 +17,7 @@ func Marshal_Any(v interface{}) graphql.Marshaler {
 	})
 }
 
+// Unmarshal_Any ...
 func Unmarshal_Any(v interface{}) (interface{}, error) {
 	return v, nil
 }

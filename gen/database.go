@@ -12,6 +12,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"gopkg.in/gormigrate.v1"
 )
 
 // DB ...
@@ -28,6 +29,7 @@ func NewDBFromEnvVars() *DB {
 	return NewDBWithString(urlString)
 }
 
+// TableName ...
 func TableName(name string) string {
 	prefix := os.Getenv("TABLE_NAME_PREFIX")
 	if prefix != "" {
@@ -104,11 +106,16 @@ func (db *DB) Query() *gorm.DB {
 	return db.db
 }
 
-// AutoMigrate ...
-func (db *DB) AutoMigrate() *gorm.DB {
-	return db.db.AutoMigrate(
-		Export{},
-	)
+// AutoMigrate run basic gorm automigration
+func (db *DB) AutoMigrate() error {
+	return AutoMigrate(db.db)
+}
+
+// Migrate run migrations using automigrate
+func (db *DB) Migrate(migrations []*gormigrate.Migration) error {
+	options := gormigrate.DefaultOptions
+	options.TableName = TableName("migrations")
+	return Migrate(db.db, options, migrations)
 }
 
 // Close ...
@@ -116,6 +123,7 @@ func (db *DB) Close() error {
 	return db.db.Close()
 }
 
+// Ping ...
 func (db *DB) Ping() error {
 	return db.db.DB().Ping()
 }

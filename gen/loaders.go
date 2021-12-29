@@ -6,6 +6,7 @@ import (
 	"github.com/graph-gophers/dataloader"
 )
 
+// GetLoaders ...
 func GetLoaders(db *DB) map[string]*dataloader.Loader {
 	loaders := map[string]*dataloader.Loader{}
 
